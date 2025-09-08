@@ -69,8 +69,8 @@ namespace Drifters_Atlas
                 
                 // Managing drag N drop.
                 if (Raylib.IsFileDropped()) {
-                    var retard = Raylib.LoadDroppedFiles();
-                    string filePath = Marshal.PtrToStringAnsi((IntPtr)retard.Paths[0]);
+                    var files = Raylib.LoadDroppedFiles();
+                    string filePath = Marshal.PtrToStringAnsi((IntPtr)files.Paths[0]);
                     string fileData = File.ReadAllText(filePath);
                     saveData = fileData.Substring(80);
                 }
