@@ -15,7 +15,7 @@ namespace Drifters_Atlas
                 (int)(Raylib.GetMonitorWidth(Raylib.GetCurrentMonitor()) * 0.7),
                 (int)(Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) * 0.7)
             );
-
+            Raylib.SetTargetFPS(30);
 
             // Setup Variables
             bool drawingMap = false;
@@ -27,13 +27,13 @@ namespace Drifters_Atlas
             float zoom = 0;
             bool underground = false;
             int imgBrightness = 0;
-            bool brightnessIncreasing = false;
+            bool brightnessIncreasing = true;
             float scale =0; // i hate this
 
             // Load Images
             Image bgImg = Raylib.LoadImage("Resources/bg_TitleBlank.png");
-            Texture2D menuBgImg = Raylib.LoadTextureFromImage(bgImg);
-            Raylib.UnloadImage(bgImg);
+            Texture2D menuBgTexture = Raylib.LoadTextureFromImage(bgImg);
+
 
             // Load Sounds
             Raylib.InitAudioDevice();
@@ -50,11 +50,24 @@ namespace Drifters_Atlas
 
                 // Menu background image properties
                 if(!drawingMap) {
-                    float scaleX = (float)windowWidth / menuBgImg.Width;
-                    float scaleY = (float)windowHeight / menuBgImg.Height;
+                    if (brightnessIncreasing) {
+                        if (imgBrightness < 30) { imgBrightness++; }
+                        else { brightnessIncreasing=false; }
+                    } else {
+                        if (imgBrightness > -30) { imgBrightness--; }
+                        else { brightnessIncreasing=true; }
+                    }
+                    Image tempImg = Raylib.ImageCopy(bgImg);
+                    Raylib.ImageColorBrightness(&tempImg, Math.Clamp(imgBrightness, -15, 5));
+                    Raylib.UpdateTexture(menuBgTexture, tempImg.Data);
+                    Raylib.UnloadImage(tempImg);
+                    float scaleX = (float)windowWidth / menuBgTexture.Width;
+                    float scaleY = (float)windowHeight / menuBgTexture.Height;
                     scale = MathF.Min(scaleX, scaleY);
+                   
                 }
                 
+                // Managing drag N drop.
                 if (Raylib.IsFileDropped()) {
                     var retard = Raylib.LoadDroppedFiles();
                     string filePath = Marshal.PtrToStringAnsi((IntPtr)retard.Paths[0]);
@@ -64,10 +77,10 @@ namespace Drifters_Atlas
 
                 // Drawing things
                 Raylib.BeginDrawing();
-                if(!drawingMap) {
-                    Raylib.DrawTextureEx(menuBgImg, new System.Numerics.Vector2(0,0), 0, scale, Color.White);
-                }
                 Raylib.ClearBackground(Color.White);
+                if (!drawingMap) {
+                    Raylib.DrawTextureEx(menuBgTexture, new System.Numerics.Vector2(0,0), 0, scale, new Color(Math.Min(220 - imgBrightness, 255), Math.Min(220 - imgBrightness, 255), Math.Min(220 - imgBrightness, 255)));
+                }
                 Raylib.DrawText(
                     Encoding.UTF8.GetString(Convert.FromBase64String(saveData)),
                     32,
