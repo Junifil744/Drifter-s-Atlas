@@ -6,7 +6,7 @@
     <RootNamespace>Drifter_s_Atlas</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PublishAot>true</PublishAot>
+    
     <InvariantGlobalization>true</InvariantGlobalization>
 	 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <Deterministic>false</Deterministic>
