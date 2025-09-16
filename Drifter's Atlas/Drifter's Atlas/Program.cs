@@ -572,7 +572,7 @@ namespace Drifters_Atlas {
                     Vector2 tmp = new Vector2(
                         (windowWidth - menuBgTexture.Width * menuBgScale) / 2,
                         (windowHeight - menuBgTexture.Height * menuBgScale) / 2
-                    );
+                    ); // TODO: Move this out. Just dont have time, im releasing.
                     Raylib.DrawTextureEx(menuBgTexture, tmp, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
                     Raylib.DrawTextEx(menuFont, menuName, new Vector2(textX, textY), 20, -2, new Color(252, 45, 193, 166));
                     Raylib.DrawTextureEx(
