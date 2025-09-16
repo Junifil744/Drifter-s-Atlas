@@ -1,13 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using Raylib_cs;
 using System.Numerics;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 
-namespace Drifters_Atlas
-{
+namespace Drifters_Atlas {
     class Program {
         [STAThread]
         public unsafe static void Main() {
@@ -18,52 +15,174 @@ namespace Drifters_Atlas
                 (int)(Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) * 0.7)
             );
             Raylib.SetTargetFPS(30);
+            Raylib.SetWindowIcon(Raylib.LoadImage("Resources/icon.png"));
 
             // Setup Variables
-            bool fileError = false;
+            // string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string v = "Alpha 0.1.9390";
+            bool debug = false;
             int currentMenu = 0;
             string menuName = string.Empty;
 
             string saveData = "";
-            float xPos = 0;
-            float yPos = 0;
-            float zoom = 0;
+            Vector2 drawPos = new Vector2(0, 0);
+            int fontSize = 25;
+            if(Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) < 1080) fontSize = 20; // shit fix. TODO: fix this better.
+            float zoom = 1;
+            float moveIncrement = 0;
             bool underground = false;
             int imgBrightness = 0;
             bool brightnessIncreasing = true;
+            bool lastFrameUGSw = false;
+            bool lastFrameInteracted = false;
             int windowWidth = Raylib.GetScreenWidth();
             int windowHeight = Raylib.GetScreenHeight();
-
+            Vector2 windowCenter = new Vector2(windowWidth / 2, windowHeight / 2);
+            KeyboardKey lastKey = KeyboardKey.Null;
 
             // Load Saves
-            string SafeReadFile(string path) {
-                try {
-                    return Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(path))).Substring(54);
-                } catch {
-                    return string.Empty;
-                }
-            }
-
             string savePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HyperLightDrifter");
             string save0 = SafeReadFile(savePath + "\\HyperLight_RecordOfTheDrifter_0.sav");
             string save1 = SafeReadFile(savePath + "\\HyperLight_RecordOfTheDrifter_1.sav");
             string save2 = SafeReadFile(savePath + "\\HyperLight_RecordOfTheDrifter_2.sav");
             string save3 = SafeReadFile(savePath + "\\HyperLight_RecordOfTheDrifter_3.sav");
+            int currentSave = 0;
 
             // Load Images
             Image bgImg = Raylib.LoadImage("Resources/bg_Title.png");
             Texture2D menuBgTexture = Raylib.LoadTextureFromImage(bgImg);
             float menuBgScale = 0;
-            Image menuBoxImg = Raylib.LoadImage("Resources/spr_MEN_Frame_Reg.png");
-            Texture2D menuBoxTexture = Raylib.LoadTextureFromImage(menuBoxImg);
+            Texture2D menuBoxTexture = Raylib.LoadTexture("Resources/spr_MEN_Frame_Reg.png");
             float menuBoxScale = 0;
             int textX = 0;
             int textY = 0;
 
-            Image sprDrifterImg = Raylib.LoadImage("Resources/spr_charstandside.png");
-            Texture2D sprDrifterTex = Raylib.LoadTextureFromImage(sprDrifterImg);
-            Image sprGhostImg = Raylib.LoadImage("Resources/spr_ghost_0.png");
-            Texture2D sprGhostTex = Raylib.LoadTextureFromImage(sprGhostImg);
+            // Map related Images loading
+            Image mapImg = Raylib.LoadImage("Resources/spr_Map_0.png");
+            Texture2D mapTex = Raylib.LoadTextureFromImage(mapImg);
+            Image mapLabImg = Raylib.LoadImage("Resources/spr_Map_Lab_0.png");
+            Texture2D mapLabTex = Raylib.LoadTextureFromImage(mapLabImg);
+            Texture2D mapDrawTex = mapTex;
+            Vector2 mapPos = new Vector2(-mapTex.Width / 2, -mapTex.Height / 2);
+
+            Texture2D sprDrifterTex = Raylib.LoadTexture("Resources/spr_charstandside.png");
+            Texture2D sprADrifterTex = Raylib.LoadTexture("Resources/spr_ADStandSide.png");
+            Texture2D sprGhostTex = Raylib.LoadTexture("Resources/spr_ghost_0.png");
+            Texture2D reticuleTex = Raylib.LoadTexture("Resources/spr_MapReticule_0.png");
+            Color retTint = Color.White;
+
+            #region Load Sprites List
+            // Textures
+            Texture2D mapDrifter = Raylib.LoadTexture("Resources/spr_MapDrifter_0.png");
+            Texture2D mapADrifter = Raylib.LoadTexture("Resources/spr_MapDrifter_2.png");
+            Image mapWarpZone = Raylib.LoadImage("Resources/spr_MapWarpPillar_0.png");
+            Image mapMonolith = Raylib.LoadImage("Resources/monolith.png");
+            Texture2D mapAbyssBase = Raylib.LoadTexture("Resources/spr_MapAbyssBase_0.png");
+            Texture2D mapAbyssBaseActive = Raylib.LoadTexture("Resources/spr_MapAbyssBase_1.png");
+            Texture2D mapAbyssPillar = Raylib.LoadTexture("Resources/spr_MapAbyssPillar_0.png");
+            Texture2D mapAbyssPillarActive = Raylib.LoadTexture("Resources/spr_MapAbyssPillar_1.png");
+            Texture2D mapAbyssModule = Raylib.LoadTexture("Resources/spr_MapAbyssModule_0.png");
+            Texture2D mapAbyssModuleActive = Raylib.LoadTexture("Resources/spr_MapAbyssModule_1.png");
+            Texture2D mapModule = Raylib.LoadTexture("Resources/spr_MapModuleMarker_1.png");
+            Texture2D mapModuleActive = Raylib.LoadTexture("Resources/spr_MapModuleMarker_0.png");
+            // Controls
+            List<MapSprite> spriteList = new List<MapSprite>();
+            // spriteList.Add(new MapSprite(mapDrifter, MapSprite.SpriteType.AbyssCenter, new Vector2(10, 0), mapADrifter)); // FOR A LATER UPDATE.
+            spriteList.Add(new MapSprite(mapAbyssBaseActive, MapSprite.SpriteType.AbyssCenter, new Vector2(-13.5f, 33.5f), false, mapAbyssBase));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(3.5f, 31.5f), false, mapAbyssPillar, 0));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-13.5f, 14.5f), false, mapAbyssPillar, 1));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-30.5f, 31.5f), false, mapAbyssPillar, 2));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-13.5f, 48.5f), false, mapAbyssPillar, 3));
+            // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-6.5f, 34f), false, mapAbyssModule, 1)); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-8.5f, 36f), false, mapAbyssModule, 2)); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-10.5f, 34f), false, mapAbyssModule, 3)); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-8.5f, 32f), false, mapAbyssModule, 4)); // North
+            // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-11.5f, 39f), false, mapAbyssModule, 5)); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 41f), false, mapAbyssModule, 6)); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-15.5f, 39f), false, mapAbyssModule, 7)); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 37f), false, mapAbyssModule, 8)); // North
+            // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-16.5f, 34f), false, mapAbyssModule, 9)); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-18.5f, 36f), false, mapAbyssModule, 10)); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-20.5f, 34f), false, mapAbyssModule, 11)); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-18.5f, 32f), false, mapAbyssModule, 12)); // North
+            // North
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-11.5f, 30f), false, mapAbyssModule, 13)); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 32f), false, mapAbyssModule, 14)); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-15.5f, 30f), false, mapAbyssModule, 15)); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 28f), false, mapAbyssModule, 16)); // North
+
+            for (int i = 0; i < 21; i++) {
+                spriteList[i].tag = "noUG";
+            }
+
+            // Warp Zones
+            spriteList.Add(new MapSprite(mapWarpZone, MapSprite.SpriteType.Warp, new Vector2(-67.5f, 2), false, 0));
+            spriteList.Add(new MapSprite(mapWarpZone, MapSprite.SpriteType.Warp, new Vector2(8.5f, -478), false, 1));
+            spriteList.Add(new MapSprite(mapWarpZone, MapSprite.SpriteType.Warp, new Vector2(-432.5f, 93), false, 2));
+            spriteList.Add(new MapSprite(mapWarpZone, MapSprite.SpriteType.Warp, new Vector2(-39.5f, 359), false, 3));
+            spriteList.Add(new MapSprite(mapWarpZone, MapSprite.SpriteType.Warp, new Vector2(501.5f, 1), false, 4));
+
+            // North Monoliths
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(27, -214.5f), false, 1));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(110, -283.5f), false, 2));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(19, -466.5f), true, 3));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(104, -437.5f), true, 4));
+            // East Monoliths
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(450, 69.5f), false, 9));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(501, -54.5f), false, 10));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(679, -37.5f), false, 11));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(391, -135.5f), false, 12));
+            // West Monoliths
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(-337, -25.5f), false, 13));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(-445, 181.5f), false, 14));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(-548, 35.5f), false, 15));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(-645, -109.5f), true, 16));
+            // South Monoliths
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(-25, 302.5f), false, 5));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(97, 365.5f), true, 6));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(-73, 434.5f), true, 7));
+            spriteList.Add(new MapSprite(mapMonolith, MapSprite.SpriteType.Monolith, new Vector2(-128, 420.5f), true, 8));
+
+            // North Modules
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(50.5f, -241), true, mapModule, -1137428));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(45.5f, -343), false, mapModule, -1084059));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(18.5f, -409), false, mapModule, -767783));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(17.5f, -526), false, mapModule, -1047430));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-61.5f, -396), true, mapModule, -1895481));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-21.5f, -388), true, mapModule, -932471));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-30.5f, -468), true, mapModule, -902212));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(5.5f, -442), true, mapModule, -813235));
+            // East Modules
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(423.5f, 70), true, mapModule, -255100));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(585.5f, 79), true, mapModule, -187905));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(560.5f, 170), true, mapModule, -167326));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(490.5f, -158), true, mapModule, -118694));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(424.5f, -85), false, mapModule, -18778));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(577.5f, 6), true, mapModule, -68841));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(591.5f, -100), false, mapModule, -53392));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(531.5f, -98), true, mapModule, -88709));
+            // West Modules
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-439.5f, 51), true, mapModule, 266784));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-353.5f, 111), false, mapModule, 185267));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-300.5f, 81), true, mapModule, 101387));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-449.5f, 125), false, mapModule, 206139));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-534.5f, 172), true, mapModule, 335443));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-557.5f, 61), false, mapModule, 353953));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-580.5f, -27), true, mapModule, 403666));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-677.5f, -16), false, mapModule, 435082));
+            // South Modules
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-21.5f, 488), true, mapModule, -416223));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-94.5f, 455), true, mapModule, -602007));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-105.5f, 424), true, mapModule, -596678));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-110.5f, 336), true, mapModule, -555279));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-157.5f, 471), true, mapModule, -676357));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(154.5f, 346), true, mapModule, -386457));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(109.5f, 355), true, mapModule, -398635));
+            spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-13.5f, 499), true, mapModule, -417825));
+            #endregion
 
             // Load font
             Font menuFont = Raylib.LoadFont("Resources/Imagine.ttf");
@@ -79,7 +198,7 @@ namespace Drifters_Atlas
             Raylib.SetSoundVolume(loadSaveSfx, 0.5f);
             Sound acceptSound = Raylib.LoadSound("Resources/snd_MenuloadComplete.wav");
 
-            #region Create controls
+            #region Create controls TODO: REMAKE THIS ENTIRE PART
             // Main Menu Page
             Button loadButton = new Button();
             Button exitButton = new Button();
@@ -110,32 +229,32 @@ namespace Drifters_Atlas
             save0Button.type = Button.ButtonType.SaveSelect;
             save0Button.text = "Empty";
             save0Button.ID = 0;
-            save0Button.drifterImage = sprDrifterImg;
-            save0Button.ghostImage = sprGhostImg;
+            save0Button.drifterImage = sprDrifterTex;
+            save0Button.ghostImage = sprGhostTex;
             save0Button.onClick += loadSave;
 
             Button save1Button = new Button();
             save1Button.type = Button.ButtonType.SaveSelect;
             save1Button.text = "Empty";
             save1Button.ID = 1;
-            save1Button.drifterImage = sprDrifterImg;
-            save1Button.ghostImage = sprGhostImg;
+            save1Button.drifterImage = sprDrifterTex;
+            save1Button.ghostImage = sprGhostTex;
             save1Button.onClick += loadSave;
 
             Button save2Button = new Button();
             save2Button.type = Button.ButtonType.SaveSelect;
             save2Button.text = "Empty";
             save2Button.ID = 2;
-            save2Button.drifterImage = sprDrifterImg;
-            save2Button.ghostImage = sprGhostImg;
+            save2Button.drifterImage = sprDrifterTex;
+            save2Button.ghostImage = sprGhostTex;
             save2Button.onClick += loadSave;
 
             Button save3Button = new Button();
             save3Button.type = Button.ButtonType.SaveSelect;
             save3Button.text = "Empty";
             save3Button.ID = 3;
-            save3Button.drifterImage = sprDrifterImg;
-            save3Button.ghostImage = sprGhostImg;
+            save3Button.drifterImage = sprDrifterTex;
+            save3Button.ghostImage = sprGhostTex;
             save3Button.onClick += loadSave;
 
             // Others
@@ -153,7 +272,7 @@ namespace Drifters_Atlas
                     Raylib.GetScreenWidth() / 2 - menuBoxTexture.Width * menuBoxScale / 2,
                     Raylib.GetScreenHeight() / 2 - menuBoxTexture.Height * menuBoxScale / 2
                 );
-                if(currentMenu != 6) {
+                if (currentMenu != 6) {
                     // Menu background image properties
                     if (brightnessIncreasing) {
                         if (imgBrightness < 60) { imgBrightness++; } else { brightnessIncreasing = false; }
@@ -166,7 +285,7 @@ namespace Drifters_Atlas
                     Raylib.UnloadImage(tempImg);
                     float scaleX = (float)windowWidth / menuBgTexture.Width;
                     float scaleY = (float)windowHeight / menuBgTexture.Height;
-                    menuBgScale = MathF.Min(scaleX, scaleY);
+                    menuBgScale = MathF.Max(scaleX, scaleY);
 
                     // Menu box properties
                     scaleX = (float)windowWidth / menuBoxTexture.Width / (float)1.4;
@@ -221,7 +340,10 @@ namespace Drifters_Atlas
                         if ((double)parseSave(0, "noviceMode") != 0) difficulty = "Newcomer";
                         if ((double)parseSave(0, "checkHP") == 3) {
                             if ((double)parseSave(0, "cape") == 11) difficulty = "New Game +";
-                            else difficulty = "New Game Alt";
+                            else {
+                                difficulty = "New Game Alt";
+                                save0Button.drifterImage = sprADrifterTex;
+                            }
                         } else difficulty = "Standard";
 
                         save0Button.text =
@@ -237,15 +359,18 @@ namespace Drifters_Atlas
                     if ((string)parseSave(1, "gameName") != "invalid") {
                         TimeSpan span = TimeSpan.FromMinutes((double)parseSave(1, "playT"));
                         string time;
-                        if(span.Hours < 1) time = $"{span.Minutes} Minutes";
+                        if (span.Hours < 1) time = $"{span.Minutes} Minutes";
                         else time = $"{span.Hours} Hours {span.Minutes} Minutes";
-                        
+
                         string difficulty;
                         if ((double)parseSave(1, "noviceMode") != 0) difficulty = "Newcomer";
                         if ((double)parseSave(1, "checkHP") == 3) {
                             if ((double)parseSave(1, "cape") == 11) difficulty = "New Game +";
-                            else difficulty = "New Game Alt"; 
-                        } else difficulty = "Standard"; 
+                            else {
+                                difficulty = "New Game Alt";
+                                save1Button.drifterImage = sprADrifterTex;
+                            }
+                        } else difficulty = "Standard";
 
                         save1Button.text =
                         (string)parseSave(1, "gameName") + "\n" +
@@ -267,7 +392,10 @@ namespace Drifters_Atlas
                         if ((double)parseSave(2, "noviceMode") != 0) difficulty = "Newcomer";
                         if ((double)parseSave(2, "checkHP") == 3) {
                             if ((double)parseSave(2, "cape") == 11) difficulty = "New Game +";
-                            else difficulty = "New Game Alt";
+                            else {
+                                difficulty = "New Game Alt";
+                                save2Button.drifterImage = sprADrifterTex;
+                            }
                         } else difficulty = "Standard";
 
                         save2Button.text =
@@ -287,10 +415,13 @@ namespace Drifters_Atlas
                         else time = $"{span.Hours} Hours {span.Minutes} Minutes";
 
                         string difficulty;
-                        if ((double)parseSave(3, "noviceMode") != 0) difficulty = "Newcomer";
-                        if ((double)parseSave(3, "checkHP") == 3) {
+                        if ((double)parseSave(3, "noviceMode") == 1) difficulty = "Newcomer";
+                        else if ((double)parseSave(3, "checkHP") == 3) {
                             if ((double)parseSave(3, "cape") == 11) difficulty = "New Game +";
-                            else difficulty = "New Game Alt";
+                            else {
+                                difficulty = "New Game Alt";
+                                save3Button.drifterImage = sprADrifterTex;
+                            }
                         } else difficulty = "Standard";
 
                         save3Button.text =
@@ -319,13 +450,118 @@ namespace Drifters_Atlas
                     backButton.parentObject = new Rectangle(menuBoxPos, new Vector2(menuBoxTexture.Width, menuBoxTexture.Height));
                     backButton.Update();
                 }
+                // The map.. Dear lord...
+                else if (currentMenu == 6) {
+
+                    // Manage movement
+                    Raylib.HideCursor();
+                    bool up = Raylib.IsKeyDown(KeyboardKey.W) || Raylib.IsKeyDown(KeyboardKey.Up);
+                    bool down = Raylib.IsKeyDown(KeyboardKey.S) || Raylib.IsKeyDown(KeyboardKey.Down);
+                    bool left = Raylib.IsKeyDown(KeyboardKey.A) || Raylib.IsKeyDown(KeyboardKey.Left);
+                    bool right = Raylib.IsKeyDown(KeyboardKey.D) || Raylib.IsKeyDown(KeyboardKey.Right);
+                    bool zoomIn = Raylib.IsKeyDown(KeyboardKey.Q) || Raylib.IsKeyDown(KeyboardKey.Kp1);
+                    bool zoomOut = Raylib.IsKeyDown(KeyboardKey.E) || Raylib.IsKeyDown(KeyboardKey.Kp2);
+                    if (Raylib.IsMouseButtonDown(MouseButton.Left) && lastFrameInteracted == false) {
+                        lastFrameInteracted = true;
+                        retTint = new Color(252, 45, 193);
+                        Raylib.PlaySound(errorSound); // Not fully implemented yet. Wait for Beta 1.0
+                    } else if (Raylib.IsMouseButtonUp(MouseButton.Left)) {
+                        lastFrameInteracted = false;
+                        retTint = Color.White;
+                    }
+                    // debug = !Raylib.IsKeyDown(KeyboardKey.F);
+
+                    if (up && mapPos.Y < 0) {
+                        lastKey = KeyboardKey.W;
+                        mapPos.Y += moveIncrement;
+                    } else if (down && mapPos.Y > -mapTex.Height) {
+                        lastKey = KeyboardKey.S;
+                        mapPos.Y -= moveIncrement;
+                    }
+                    if (left && mapPos.X < 0) {
+                        lastKey = KeyboardKey.A;
+                        mapPos.X += moveIncrement;
+                    } else if (right && mapPos.X > -mapTex.Width) {
+                        lastKey = KeyboardKey.D;
+                        mapPos.X -= moveIncrement;
+                    }
+                    if (zoomIn && zoom < 13f) {
+                        zoom += 0.1f;
+                    } else if (zoomOut && zoom > 0.6f) {
+                        zoom -= 0.1f;
+                    }
+                    if (zoom < 0.6f) zoom = 0.6f;
+                    if ((Raylib.IsKeyDown(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) && lastFrameUGSw == false) {
+                        underground = !underground;
+                        lastFrameUGSw = true;
+                        Raylib.PlaySound(acceptSound);
+                    }
+                    if (Raylib.IsKeyUp(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) {
+                        lastFrameUGSw = false;
+                    }
+                    if (!up && !down && !left && !right) {
+                        if (lastKey == KeyboardKey.W && mapPos.Y < 0) mapPos.Y += moveIncrement;
+                        if (lastKey == KeyboardKey.A && mapPos.X < 0) mapPos.X += moveIncrement;
+                        if (lastKey == KeyboardKey.S && mapPos.Y > -mapTex.Height) mapPos.Y -= moveIncrement;
+                        if (lastKey == KeyboardKey.D && mapPos.X > -mapTex.Width) mapPos.X -= moveIncrement;
+                        if (moveIncrement > 0) moveIncrement -= 0.4f;
+                        else if (moveIncrement < 0) moveIncrement = 0;
+                    } else {
+                        if (moveIncrement < 5) moveIncrement += 0.2f;
+                    }
+                    drawPos = new Vector2(
+                        windowCenter.X + mapPos.X * zoom,
+                        windowCenter.Y + mapPos.Y * zoom
+                    );
+
+                    if (underground) mapDrawTex = mapLabTex;
+                    else mapDrawTex = mapTex;
+
+                    // Update sprites
+                    foreach (MapSprite sprite in spriteList) {
+                        if (sprite.type == MapSprite.SpriteType.Warp) {
+                            sprite.collected = ((string)parseSave(currentSave, "warp")).Contains(sprite.ID.ToString());
+                        } else if (sprite.type == MapSprite.SpriteType.Monolith) {
+                            sprite.collected = ((string)parseSave(currentSave, "tablet")).Contains(sprite.ID.ToString());
+                        } else if (sprite.type == MapSprite.SpriteType.Module) {
+                            for (byte i = 6; i <= 9; i++) {
+                                sprite.collected = parseModule(currentSave, i, sprite.ID);
+                                if (sprite.collected) break;
+                            }
+                            
+                        } else if (sprite.type == MapSprite.SpriteType.AbyssPillar) {
+                            sprite.collected = ((string)parseSave(currentSave, "well")).Contains(sprite.ID.ToString());
+                        } else if (sprite.type == MapSprite.SpriteType.AbyssCenter) {
+                            sprite.collected = parseCL(currentSave, 6).Count() >= 4 && parseCL(currentSave, 7).Count() >= 4 && parseCL(currentSave, 8).Count() >= 4 && parseCL(currentSave, 9).Count() >= 4;
+                        } else if (sprite.type == MapSprite.SpriteType.AbyssModule) {
+                            for (int section = 6; section <= 9; section++) {
+                                byte count = (byte)Math.Min(parseCL(currentSave, (byte)section).Count(), 4);
+                                for (int i = 0; i < count; i++) {
+                                    int targetID = (section-6)*4 + i + 1;
+                                    sprite.collected = targetID == sprite.ID;
+                                    if (sprite.collected) break;
+                                }
+                                if (sprite.collected) break;
+                            }
+                        }
+                        sprite.scale = zoom;
+                        sprite.parentObject = new Rectangle(drawPos, new Vector2(mapTex.Width * zoom, mapTex.Height * zoom));
+                        sprite.Update();
+                    }
+                }
 
                 // Managing drag N drop.
-                if (Raylib.IsFileDropped()) {
+                if (Raylib.IsFileDropped() && currentMenu != 6) {
                     var files = Raylib.LoadDroppedFiles();
-                    string filePath = Marshal.PtrToStringAnsi((IntPtr)files.Paths[0]);
-                    string fileData = File.ReadAllText(filePath);
-                    saveData = fileData.Substring(80);
+                    try {
+                        saveData = Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(Marshal.PtrToStringAnsi((IntPtr)files.Paths[0])))).Substring(54);
+                        Raylib.UnloadDroppedFiles(files);
+                        loadSave(10);
+                    } catch {
+                        Raylib.PlaySound(errorSound);
+                        Raylib.UnloadDroppedFiles(files);
+
+                    }
                 }
 
                 // Drawing things
@@ -333,7 +569,11 @@ namespace Drifters_Atlas
                 Raylib.ClearBackground(Color.White);
                 // Draw the background
                 if (currentMenu != 6) {
-                    Raylib.DrawTextureEx(menuBgTexture, new Vector2(0, 0), 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
+                    Vector2 tmp = new Vector2(
+                        (windowWidth - menuBgTexture.Width * menuBgScale) / 2,
+                        (windowHeight - menuBgTexture.Height * menuBgScale) / 2
+                    );
+                    Raylib.DrawTextureEx(menuBgTexture, tmp, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
                     Raylib.DrawTextEx(menuFont, menuName, new Vector2(textX, textY), 20, -2, new Color(252, 45, 193, 166));
                     Raylib.DrawTextureEx(
                         menuBoxTexture,
@@ -345,6 +585,8 @@ namespace Drifters_Atlas
                         menuBoxScale,
                         Color.White
                     );
+
+                    Raylib.DrawTextEx(menuFont, v, new Vector2(windowWidth - Raylib.MeasureTextEx(menuFont, v, fontSize, -2).X, menuBgTexture.Height * menuBgScale - fontSize), fontSize, -2, Color.White);
                 }
                 if (currentMenu == 0) {
                     // Draw the controls for main menu
@@ -362,22 +604,33 @@ namespace Drifters_Atlas
                     Raylib.DrawLine((int)save2Button.rect.X, (int)save2Button.rect.Y, (int)save2Button.rect.X + (int)save2Button.rect.Width, (int)save2Button.rect.Y, new Color(255, 255, 255, 166));
                     Raylib.DrawLine((int)save3Button.rect.X, (int)save3Button.rect.Y, (int)save3Button.rect.X + (int)save3Button.rect.Width, (int)save3Button.rect.Y, new Color(255, 255, 255, 166));
                 } else if (currentMenu == 2) {
-                    Raylib.DrawTextEx(menuFont, "Test :3", new Vector2(menuBoxPos.X + 60, menuBoxPos.Y + 10), 25, -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, "Controls\nWASD/Arrow Keys = Move\nQ/Numpad1 = Zoom In\nE/Numpad2 = Zoom out\nR/Numpad3 = Go Underground\n\n\nTHIS IS A VERY EARLY BUILD\nTHINGS WILL CHANGE\nI'm open to any feedback\nYou can contact me at my Discord or at\njunifil@middlemouse.click\nFor any bug reports!\n\n\nAlpha 0.1\nBuilt September 16 2025", new Vector2(menuBoxPos.X + 60, menuBoxPos.Y + 10), fontSize, -2, Color.White);
+                } else if (currentMenu == 3) {
+                    Raylib.DrawTextEx(menuFont, "Credits!\n\nJunifil: Coding the whole thing and\n     putting everything together.\nTK: Moral support dawg.", new Vector2(menuBoxPos.X + 60, menuBoxPos.Y + 10), fontSize, -2, Color.White);
+                }
+                if (currentMenu == 6) {
+                    // dear god.
+                    // theres more
+                    // no!
+
+                    Raylib.ClearBackground(Color.Black);
+                    Raylib.DrawTextureEx(mapDrawTex, drawPos, 0, zoom, Color.White);
+                    foreach (MapSprite sprite in spriteList) {
+                        if (underground == sprite.underground || sprite.tag.Contains("noUG")) {
+                            sprite.Draw();
+                            if (debug) Raylib.DrawRectangleLinesEx(sprite.rect, 2 * (zoom / 10), Color.Purple);
+                        }
+                    }
+                    Raylib.DrawTextureEx(reticuleTex, new Vector2(Raylib.GetMousePosition().X - reticuleTex.Width * 1.5f, Raylib.GetMousePosition().Y - reticuleTex.Height * 1.5f), 0, 3f, retTint);
+
+
                 }
                 if (currentMenu != 6 && currentMenu != 0) {
                     // Draw back button
                     backButton.Draw();
                 }
-                    Raylib.DrawText($"save1Button\n{save1Button.rect.X},{save1Button.rect.Y}\n\nMouse\n{Raylib.GetMousePosition().X},{Raylib.GetMousePosition().Y}", 0, 0, 20, Color.White);
-                // Temporary
-                /*Raylib.DrawText(
-                    Encoding.UTF8.GetString(Convert.FromBase64String(saveData)).Replace(",", "\n"),
-                    32,
-                    32,
-                    20,
-                    Color.White
-                );*/
-
+                Vector2 mouseMap = (Raylib.GetMousePosition() - windowCenter) / zoom - mapPos - new Vector2(mapTex.Width / 2, mapTex.Height / 2);
+                if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nScale: {mapTex.Width * zoom},{mapTex.Height * zoom}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\nSave\nMonoliths: {(string)parseSave(currentSave, "tablet")}\nCL: {(string)parseSave(currentSave, "cl")}", 0, 0, 20, Color.Pink);
 
                 Raylib.EndDrawing();
             }
@@ -399,25 +652,25 @@ namespace Drifters_Atlas
                     currentMenu = 3;
                 }
             }
-            void loadMenuButtonClick(int ID) {
-                Raylib.SetSoundPitch(menuAction, 1f);
-                Raylib.PlaySound(menuAction);
-            }
             void backButtonClick(int ID) {
                 Raylib.SetSoundPitch(menuAction, 0.5f);
                 Raylib.PlaySound(menuAction);
                 currentMenu = 0;
             }
             void loadSave(int ID) {
-                if((string)parseSave(ID, "gameName") != "invalid") {
+                if (ID == 10) {
+                    Raylib.PlaySound(acceptSound);
+                    currentMenu = 6;
+                    currentSave = 10;
+                } else if ((string)parseSave(ID, "gameName") != "invalid") {
                     Raylib.PlaySound(loadSaveSfx);
                     Raylib.PlaySound(acceptSound);
                     currentMenu = 6;
+                    currentSave = ID;
                 } else Raylib.PlaySound(errorSound);
             }
 
             // Helper functions
-            // TODO: dont fucking do this. store the 4 saves in RAM, do NOT fucking load all of them SEVERAL TIMES, MULTIPLE TIMES PER FRAME
             object parseSave(int ID, string parameter) {
                 try {
                     dynamic save = null;
@@ -438,17 +691,52 @@ namespace Drifters_Atlas
 
 
                     return save[parameter].Value;
-                } catch (Exception e) {
+                } catch {
                     return "invalid";
                 }
-                return "halp"; // placeholder, dont you bitch about this
+            }
+            bool parseModule(int saveID, byte section, int ID) {
+                try {
+                    string CL = (string)parseSave(saveID, "cl");
+                    string[] sections = CL.Split(">");
+                    foreach (string s in sections) {
+                        if (s.Contains(section.ToString() + "=")) {
+                            
+                            return s.Contains(Convert.ToString(ID));
+                        }
+                    }
+                    return false;
+                } catch {
+                    return false;
+                }
+            }
+            string[] parseCL(int saveID, byte section) {
+                try {
+                    string CL = (string)parseSave(saveID, "cl");
+                    string[] sections = CL.Split(">");
+                    foreach (string s in sections) {
+                        if (s.Contains(section.ToString() + "=")) {
+                            return s.Split("&").Take(s.Split("&").Length - 1).ToArray();
+                        }
+                    }
+                    return System.Array.Empty<string>();
+                } catch {
+                    return System.Array.Empty<string>();
+                }
+            }
+            string SafeReadFile(string path) {
+                try {
+                    return Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(path))).Substring(54);
+                } catch {
+                    return string.Empty;
+                }
             }
         }
     }
 
     unsafe class Button{
         public enum ButtonType : ushort {
-            None = 0, // Never to be used. You will fuck things up. Its just useful to define a variable to be none when initialized.
+            None = 0, // Never to be used. Wont load anything. Its just useful to define a variable to be none when initialized.
             Menu = 1, // Menu buttons
             SaveSelect = 2, // Selecting a save, this one has support for images and will need more than 1 label. Text content is not chooseable
             Map = 3 // Smaller square buttons for map functions.
@@ -458,8 +746,8 @@ namespace Drifters_Atlas
         public bool hovering = false;
         public ButtonType type;
         public int ID;
-        public Image? drifterImage;
-        public Image? ghostImage;
+        public Texture2D drifterImage;
+        public Texture2D ghostImage;
         public event buttonClick onClick;
         public Vector2 localPosition;
         public Rectangle parentObject;
@@ -472,9 +760,12 @@ namespace Drifters_Atlas
         private bool lastFrameHover = false;
         private Font menuFont = Raylib.LoadFont("Resources/Imagine.ttf");
         private string[] props;
+        private Vector2 drifterPos = Vector2.Zero;
+        private int fontSize = 25;
 
         public Button() {
             Raylib.SetTextureFilter(menuFont.Texture, TextureFilter.Point);
+            if (Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) < 1080) fontSize = 20;
         }
 
         public void Update() {
@@ -486,25 +777,26 @@ namespace Drifters_Atlas
 
             if (type == ButtonType.Menu) {
                 textPos = new Vector2(
-                    rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, text, 25, -2f).X) / 2,
-                    rect.Y + (rect.Height - 25) / 2
+                    rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, text, fontSize, -2f).X) / 2,
+                    rect.Y + (rect.Height - fontSize) / 2
                 );
             }
             else if (type == ButtonType.SaveSelect) {
                 props = text.Split('\n');
                 namePos = new Vector2(
-                    rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[0], 25, -2f).X) / 2,
-                    rect.Y + 25
+                    rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[0], fontSize, -2f).X) / 2,
+                    rect.Y + fontSize
                 );
                 if (text != "Empty") {
                     timePos = new Vector2(
-                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[1], 25, -2f).X) / 2,
+                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[1], fontSize, -2f).X) / 2,
                         rect.Y + 60
                     );
                     textPos = new Vector2(
-                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[2], 25, -2f).X) / 2,
+                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[2], fontSize, -2f).X) / 2,
                         rect.Y + 90
                     );
+                    drifterPos = new Vector2(rect.X + rect.Width - drifterImage.Width * 3 - 30, rect.Y + rect.Height/2 - drifterImage.Height*3/2);
                 }
             }
             if (hovering && Raylib.IsMouseButtonPressed(MouseButton.Left)) {
@@ -523,20 +815,95 @@ namespace Drifters_Atlas
                     Raylib.DrawRectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height, new Color(211, 6, 128, 230));
                 }
                 if (border) Raylib.DrawRectangleLinesEx(rect, 2f, new Color(211, 6, 128, 110));
-                Raylib.DrawTextEx(menuFont, text, new Vector2(textPos.X, textPos.Y), 25, -2, Color.White);
+                Raylib.DrawTextEx(menuFont, text, new Vector2(textPos.X, textPos.Y), fontSize, -2, Color.White);
             } else if (type == ButtonType.SaveSelect) {
                 if (hovering) {
                     Raylib.DrawRectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height, new Color(211, 6, 128, 130));
                 }
                 if(text != "Empty") {
-                    Raylib.DrawTextEx(menuFont, props[0], new Vector2(namePos.X, namePos.Y), 25, -2, Color.White);
-                    Raylib.DrawTextEx(menuFont, props[1], new Vector2(timePos.X, timePos.Y), 25, -2, new Color(44, 197, 177));
-                    Raylib.DrawTextEx(menuFont, props[2], new Vector2(textPos.X, textPos.Y), 25, -2, new Color(190, 190, 190));
+                    Raylib.DrawTextEx(menuFont, props[0], new Vector2(namePos.X, namePos.Y), fontSize, -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, props[1], new Vector2(timePos.X, timePos.Y), fontSize, -2, new Color(44, 197, 177));
+                    Raylib.DrawTextEx(menuFont, props[2], new Vector2(textPos.X, textPos.Y), fontSize, -2, new Color(190, 190, 190));
+                    Raylib.DrawTextureEx(drifterImage, drifterPos, 0, 3f, Color.White);
                 } else {
-                    Raylib.DrawTextEx(menuFont, text, new Vector2(namePos.X, namePos.Y), 25, -2, new Color(252, 45, 193, 136));
+                    Raylib.DrawTextEx(menuFont, text, new Vector2(namePos.X, namePos.Y), fontSize, -2, new Color(252, 45, 193, 136));
                 }
             }
         }
         public delegate void buttonClick(int ID);
+    }
+
+    unsafe class MapSprite {
+        public enum SpriteType : ushort {
+            None = 0,
+            Drifter = 1,
+            Boss = 2,
+            Gearbit = 3,
+            Key = 4,
+            Monolith = 5,
+            Module = 6,
+            ModuleDoor = 7,
+            Gun = 8,
+            ColorSet = 9,
+            Warp = 10,
+            Tower = 11,
+
+            AbyssCenter = 12,
+            AbyssModule = 13,
+            AbyssPillar = 14
+        }
+        public Rectangle rect;
+        public SpriteType type;
+        public int ID = 0;
+        public string tag = string.Empty;
+        public Texture2D sprite;
+        public Texture2D? altSprite;
+        public event collectibleClick onClick;
+        public Vector2 localPosition;
+        public Rectangle parentObject;
+        public float scale;
+        public string tip;
+        public bool underground = false;
+        public bool collected = false;
+
+        public MapSprite(Texture2D tex, SpriteType sType, Vector2 pos, bool underground, Texture2D? altTex = null, int? id = null) {
+            ID = id ?? 0;
+            type = sType;
+            sprite = tex;
+            altSprite = altTex;
+            localPosition = pos;
+            this.underground = underground;
+        }
+        public MapSprite(Image tex, SpriteType sType, Vector2 pos, bool underground, int? id = null) {
+            ID = id ?? 0;
+            this.underground = underground;
+            type = sType;
+            localPosition = pos;
+            Image tmpImg = Raylib.ImageCopy(tex);
+            sprite = Raylib.LoadTextureFromImage(tmpImg);
+            Raylib.ImageFormat(ref tmpImg, PixelFormat.UncompressedGrayAlpha);
+            altSprite = Raylib.LoadTextureFromImage(tmpImg);
+            Raylib.UnloadImage(tmpImg);
+        }
+
+        public void Update() {
+            rect.Width = sprite.Width * scale;
+            rect.Height = sprite.Height * scale;
+
+            Vector2 worldPos = new Vector2(
+                parentObject.X + parentObject.Width * 0.5f + localPosition.X * scale,
+                parentObject.Y + parentObject.Height * 0.5f + localPosition.Y * scale
+            );
+
+            // convert center -> top-left
+            rect.X = worldPos.X - rect.Width * 0.5f;
+            rect.Y = worldPos.Y - rect.Height * 0.5f;
+        }
+
+        public void Draw() {
+            if(collected) Raylib.DrawTextureEx(sprite, new Vector2(rect.X, rect.Y), 0, scale, Color.White);
+            else Raylib.DrawTextureEx(altSprite ?? sprite, new Vector2(rect.X, rect.Y), 0, scale, Color.White);
+        }
+        public delegate void collectibleClick();
     }
 }
