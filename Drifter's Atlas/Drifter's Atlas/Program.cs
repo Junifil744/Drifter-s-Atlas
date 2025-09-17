@@ -18,13 +18,13 @@ namespace Drifters_Atlas {
             Raylib.SetWindowIcon(Raylib.LoadImage("Resources/icon.png"));
 
             // Setup Variables
-            // string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            string v = "Alpha 0.1.9390";
+            string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            // string v = "Alpha 0.1.9390";
             bool debug = false;
             int currentMenu = 0;
             string menuName = string.Empty;
 
-            string saveData = "";
+            string saveData = string.Empty;
             Vector2 drawPos = new Vector2(0, 0);
             int fontSize = 25;
             if(Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) < 1080) fontSize = 20; // shit fix. TODO: fix this better.
@@ -35,6 +35,7 @@ namespace Drifters_Atlas {
             bool brightnessIncreasing = true;
             bool lastFrameUGSw = false;
             bool lastFrameInteracted = false;
+            Vector2 bgPos = new Vector2(0, 0);
             int windowWidth = Raylib.GetScreenWidth();
             int windowHeight = Raylib.GetScreenHeight();
             Vector2 windowCenter = new Vector2(windowWidth / 2, windowHeight / 2);
@@ -58,10 +59,8 @@ namespace Drifters_Atlas {
             int textY = 0;
 
             // Map related Images loading
-            Image mapImg = Raylib.LoadImage("Resources/spr_Map_0.png");
-            Texture2D mapTex = Raylib.LoadTextureFromImage(mapImg);
-            Image mapLabImg = Raylib.LoadImage("Resources/spr_Map_Lab_0.png");
-            Texture2D mapLabTex = Raylib.LoadTextureFromImage(mapLabImg);
+            Texture2D mapTex = Raylib.LoadTexture("Resources/spr_Map_0.png");
+            Texture2D mapLabTex = Raylib.LoadTexture("Resources/spr_Map_Lab_0.png");
             Texture2D mapDrawTex = mapTex;
             Vector2 mapPos = new Vector2(-mapTex.Width / 2, -mapTex.Height / 2);
 
@@ -198,72 +197,30 @@ namespace Drifters_Atlas {
             Raylib.SetSoundVolume(loadSaveSfx, 0.5f);
             Sound acceptSound = Raylib.LoadSound("Resources/snd_MenuloadComplete.wav");
 
-            #region Create controls TODO: REMAKE THIS ENTIRE PART
+            #region Create controls
             // Main Menu Page
-            Button loadButton = new Button();
-            Button exitButton = new Button();
-            Button helpButton = new Button();
-            Button creditsButton = new Button();
-            loadButton.text = "Load Save";
-            loadButton.type = Button.ButtonType.Menu;
-            loadButton.ID = 0;
+            Button loadButton = new Button("Load Save", 0, Button.ButtonType.Menu, null);
+            Button exitButton = new Button("Exit Tool", 1, Button.ButtonType.Menu, null);
+            Button helpButton = new Button("Information", 2, Button.ButtonType.Menu, null);
+            Button creditsButton = new Button("Credits", 3, Button.ButtonType.Menu, null);
             loadButton.onClick += mainMenuButtonClick;
-
-            exitButton.text = "Exit Tool";
-            exitButton.type = Button.ButtonType.Menu;
-            exitButton.ID = 1;
             exitButton.onClick += mainMenuButtonClick;
-
-            helpButton.text = "Information";
-            helpButton.type = Button.ButtonType.Menu;
-            helpButton.ID = 2;
             helpButton.onClick += mainMenuButtonClick;
-
-            creditsButton.text = "Credits";
-            creditsButton.type = Button.ButtonType.Menu;
-            creditsButton.ID = 3;
             creditsButton.onClick += mainMenuButtonClick;
 
             // Load Save Page
-            Button save0Button = new Button();
-            save0Button.type = Button.ButtonType.SaveSelect;
-            save0Button.text = "Empty";
-            save0Button.ID = 0;
-            save0Button.drifterImage = sprDrifterTex;
-            save0Button.ghostImage = sprGhostTex;
+            Button save0Button = new Button("Empty", 0, Button.ButtonType.SaveSelect, sprDrifterTex);
+            Button save1Button = new Button("Empty", 1, Button.ButtonType.SaveSelect, sprDrifterTex);
+            Button save2Button = new Button("Empty", 2, Button.ButtonType.SaveSelect, sprDrifterTex);
+            Button save3Button = new Button("Empty", 3, Button.ButtonType.SaveSelect, sprDrifterTex);
             save0Button.onClick += loadSave;
-
-            Button save1Button = new Button();
-            save1Button.type = Button.ButtonType.SaveSelect;
-            save1Button.text = "Empty";
-            save1Button.ID = 1;
-            save1Button.drifterImage = sprDrifterTex;
-            save1Button.ghostImage = sprGhostTex;
             save1Button.onClick += loadSave;
-
-            Button save2Button = new Button();
-            save2Button.type = Button.ButtonType.SaveSelect;
-            save2Button.text = "Empty";
-            save2Button.ID = 2;
-            save2Button.drifterImage = sprDrifterTex;
-            save2Button.ghostImage = sprGhostTex;
             save2Button.onClick += loadSave;
-
-            Button save3Button = new Button();
-            save3Button.type = Button.ButtonType.SaveSelect;
-            save3Button.text = "Empty";
-            save3Button.ID = 3;
-            save3Button.drifterImage = sprDrifterTex;
-            save3Button.ghostImage = sprGhostTex;
             save3Button.onClick += loadSave;
 
             // Others
-            Button backButton = new Button();
-            backButton.text = "Back";
-            backButton.type = Button.ButtonType.Menu;
-            backButton.ID = 0;
+            Button backButton = new Button("Back", 0, Button.ButtonType.Menu, null, true);
             backButton.onClick += backButtonClick;
-            backButton.border = true;
             #endregion
 
             // Run the program
@@ -286,6 +243,10 @@ namespace Drifters_Atlas {
                     float scaleX = (float)windowWidth / menuBgTexture.Width;
                     float scaleY = (float)windowHeight / menuBgTexture.Height;
                     menuBgScale = MathF.Max(scaleX, scaleY);
+                    bgPos = new Vector2(
+                        (windowWidth - menuBgTexture.Width * menuBgScale) / 2,
+                        (windowHeight - menuBgTexture.Height * menuBgScale) / 2
+                    );
 
                     // Menu box properties
                     scaleX = (float)windowWidth / menuBoxTexture.Width / (float)1.4;
@@ -331,25 +292,7 @@ namespace Drifters_Atlas {
                     backButton.Update();
 
                     if ((string)parseSave(0, "gameName") != "invalid") {
-                        TimeSpan span = TimeSpan.FromMinutes((double)parseSave(0, "playT"));
-                        string time;
-                        if (span.Hours < 1) time = $"{span.Minutes} Minutes";
-                        else time = $"{span.Hours} Hours {span.Minutes} Minutes";
-
-                        string difficulty;
-                        if ((double)parseSave(0, "noviceMode") != 0) difficulty = "Newcomer";
-                        if ((double)parseSave(0, "checkHP") == 3) {
-                            if ((double)parseSave(0, "cape") == 11) difficulty = "New Game +";
-                            else {
-                                difficulty = "New Game Alt";
-                                save0Button.drifterImage = sprADrifterTex;
-                            }
-                        } else difficulty = "Standard";
-
-                        save0Button.text =
-                        (string)parseSave(0, "gameName") + "\n" +
-                        time + "\n" +
-                        DateTime.FromOADate((double)parseSave(0, "dateTime")).ToString("MM/dd/yy") + " . " + difficulty;
+                        getSaveInfo(ref save0Button);
                     }
                     save0Button.rect = new Rectangle(0, 0, menuBoxTexture.Width * menuBoxScale - 58, menuBoxTexture.Height * menuBoxScale / 4);
                     save0Button.localPosition = new Vector2(30, menuBoxTexture.Height * menuBoxScale / 4 * 0);
@@ -357,25 +300,7 @@ namespace Drifters_Atlas {
                     save0Button.Update();
 
                     if ((string)parseSave(1, "gameName") != "invalid") {
-                        TimeSpan span = TimeSpan.FromMinutes((double)parseSave(1, "playT"));
-                        string time;
-                        if (span.Hours < 1) time = $"{span.Minutes} Minutes";
-                        else time = $"{span.Hours} Hours {span.Minutes} Minutes";
-
-                        string difficulty;
-                        if ((double)parseSave(1, "noviceMode") != 0) difficulty = "Newcomer";
-                        if ((double)parseSave(1, "checkHP") == 3) {
-                            if ((double)parseSave(1, "cape") == 11) difficulty = "New Game +";
-                            else {
-                                difficulty = "New Game Alt";
-                                save1Button.drifterImage = sprADrifterTex;
-                            }
-                        } else difficulty = "Standard";
-
-                        save1Button.text =
-                        (string)parseSave(1, "gameName") + "\n" +
-                        time + "\n" +
-                        DateTime.FromOADate((double)parseSave(1, "dateTime")).ToString("MM/dd/yy") + " . " + difficulty;
+                        getSaveInfo(ref save1Button);
                     }
                     save1Button.rect = new Rectangle(0, 0, menuBoxTexture.Width * menuBoxScale - 58, menuBoxTexture.Height * menuBoxScale / 4);
                     save1Button.localPosition = new Vector2(30, menuBoxTexture.Height * menuBoxScale / 4 * 1);
@@ -383,25 +308,7 @@ namespace Drifters_Atlas {
                     save1Button.Update();
 
                     if ((string)parseSave(2, "gameName") != "invalid") {
-                        TimeSpan span = TimeSpan.FromMinutes((double)parseSave(2, "playT"));
-                        string time;
-                        if (span.Hours < 1) time = $"{span.Minutes} Minutes";
-                        else time = $"{span.Hours} Hours {span.Minutes} Minutes";
-
-                        string difficulty;
-                        if ((double)parseSave(2, "noviceMode") != 0) difficulty = "Newcomer";
-                        if ((double)parseSave(2, "checkHP") == 3) {
-                            if ((double)parseSave(2, "cape") == 11) difficulty = "New Game +";
-                            else {
-                                difficulty = "New Game Alt";
-                                save2Button.drifterImage = sprADrifterTex;
-                            }
-                        } else difficulty = "Standard";
-
-                        save2Button.text =
-                        (string)parseSave(2, "gameName") + "\n" +
-                        time + "\n" +
-                        DateTime.FromOADate((double)parseSave(2, "dateTime")).ToString("MM/dd/yy") + " . " + difficulty;
+                        getSaveInfo(ref save2Button);
                     }
                     save2Button.rect = new Rectangle(0, 0, menuBoxTexture.Width * menuBoxScale - 58, menuBoxTexture.Height * menuBoxScale / 4);
                     save2Button.localPosition = new Vector2(30, menuBoxTexture.Height * menuBoxScale / 4 * 2);
@@ -409,25 +316,7 @@ namespace Drifters_Atlas {
                     save2Button.Update();
 
                     if ((string)parseSave(3, "gameName") != "invalid") {
-                        TimeSpan span = TimeSpan.FromMinutes((double)parseSave(3, "playT"));
-                        string time;
-                        if (span.Hours < 1) time = $"{span.Minutes} Minutes";
-                        else time = $"{span.Hours} Hours {span.Minutes} Minutes";
-
-                        string difficulty;
-                        if ((double)parseSave(3, "noviceMode") == 1) difficulty = "Newcomer";
-                        else if ((double)parseSave(3, "checkHP") == 3) {
-                            if ((double)parseSave(3, "cape") == 11) difficulty = "New Game +";
-                            else {
-                                difficulty = "New Game Alt";
-                                save3Button.drifterImage = sprADrifterTex;
-                            }
-                        } else difficulty = "Standard";
-
-                        save3Button.text =
-                        (string)parseSave(3, "gameName") + "\n" +
-                        time + "\n" +
-                        DateTime.FromOADate((double)parseSave(3, "dateTime")).ToString("MM/dd/yy") + " . " + difficulty;
+                        getSaveInfo(ref save3Button);
                     }
                     save3Button.rect = new Rectangle(0, 0, menuBoxTexture.Width * menuBoxScale - 58, menuBoxTexture.Height * menuBoxScale / 4);
                     save3Button.localPosition = new Vector2(30, menuBoxTexture.Height * menuBoxScale / 4 * 3);
@@ -469,7 +358,7 @@ namespace Drifters_Atlas {
                         lastFrameInteracted = false;
                         retTint = Color.White;
                     }
-                    // debug = !Raylib.IsKeyDown(KeyboardKey.F);
+                    debug = !Raylib.IsKeyDown(KeyboardKey.F);
 
                     if (up && mapPos.Y < 0) {
                         lastKey = KeyboardKey.W;
@@ -569,11 +458,7 @@ namespace Drifters_Atlas {
                 Raylib.ClearBackground(Color.White);
                 // Draw the background
                 if (currentMenu != 6) {
-                    Vector2 tmp = new Vector2(
-                        (windowWidth - menuBgTexture.Width * menuBgScale) / 2,
-                        (windowHeight - menuBgTexture.Height * menuBgScale) / 2
-                    ); // TODO: Move this out. Just dont have time, im releasing.
-                    Raylib.DrawTextureEx(menuBgTexture, tmp, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
+                    Raylib.DrawTextureEx(menuBgTexture, bgPos, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
                     Raylib.DrawTextEx(menuFont, menuName, new Vector2(textX, textY), 20, -2, new Color(252, 45, 193, 166));
                     Raylib.DrawTextureEx(
                         menuBoxTexture,
@@ -731,6 +616,26 @@ namespace Drifters_Atlas {
                     return string.Empty;
                 }
             }
+            void getSaveInfo(ref Button button) {
+                TimeSpan span = TimeSpan.FromMinutes((double)parseSave(button.ID, "playT"));
+                string time;
+                if (span.Hours < 1) time = $"{span.Minutes} Minutes";
+                else time = $"{span.Hours} Hours {span.Minutes} Minutes";
+
+                string difficulty;
+                if ((double)parseSave(button.ID, "noviceMode") != 0) difficulty = "Newcomer";
+                if ((double)parseSave(button.ID, "checkHP") == 3) {
+                    difficulty = "New Game Alt";
+                    button.image = sprADrifterTex;
+                } 
+                else if ((double)parseSave(button.ID, "cape") == 11) difficulty = "New Game +";
+                else difficulty = "Standard";
+
+                save1Button.text =
+                (string)parseSave(button.ID, "gameName") + "\n" +
+                time + "\n" +
+                DateTime.FromOADate((double)parseSave(button.ID, "dateTime")).ToString("MM/dd/yy") + " . " + difficulty;
+            }
         }
     }
 
@@ -746,12 +651,12 @@ namespace Drifters_Atlas {
         public bool hovering = false;
         public ButtonType type;
         public int ID;
-        public Texture2D drifterImage;
         public Texture2D ghostImage;
+        public Texture2D image;
         public event buttonClick onClick;
         public Vector2 localPosition;
         public Rectangle parentObject;
-        public bool border = false;
+        public bool border;
 
         private Sound hoverSfx = Raylib.LoadSound("Resources/snd_MenuMove.wav");
         private Vector2 textPos = Vector2.Zero;
@@ -763,7 +668,13 @@ namespace Drifters_Atlas {
         private Vector2 drifterPos = Vector2.Zero;
         private int fontSize = 25;
 
-        public Button() {
+        public Button(string text, int ID, ButtonType type, Texture2D? image, bool border = false) {
+            this.ID = ID;
+            this.text = text;
+            this.type = type;
+            this.image = image ?? Raylib.LoadTextureFromImage(Raylib.GenImageColor(0,0,Color.Blank));
+            this.border = border;
+
             Raylib.SetTextureFilter(menuFont.Texture, TextureFilter.Point);
             if (Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) < 1080) fontSize = 20;
         }
@@ -796,7 +707,7 @@ namespace Drifters_Atlas {
                         rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[2], fontSize, -2f).X) / 2,
                         rect.Y + 90
                     );
-                    drifterPos = new Vector2(rect.X + rect.Width - drifterImage.Width * 3 - 30, rect.Y + rect.Height/2 - drifterImage.Height*3/2);
+                    drifterPos = new Vector2(rect.X + rect.Width - image.Width * 3 - 30, rect.Y + rect.Height/2 - image.Height*3/2);
                 }
             }
             if (hovering && Raylib.IsMouseButtonPressed(MouseButton.Left)) {
@@ -824,7 +735,7 @@ namespace Drifters_Atlas {
                     Raylib.DrawTextEx(menuFont, props[0], new Vector2(namePos.X, namePos.Y), fontSize, -2, Color.White);
                     Raylib.DrawTextEx(menuFont, props[1], new Vector2(timePos.X, timePos.Y), fontSize, -2, new Color(44, 197, 177));
                     Raylib.DrawTextEx(menuFont, props[2], new Vector2(textPos.X, textPos.Y), fontSize, -2, new Color(190, 190, 190));
-                    Raylib.DrawTextureEx(drifterImage, drifterPos, 0, 3f, Color.White);
+                    Raylib.DrawTextureEx(image, drifterPos, 0, 3f, Color.White);
                 } else {
                     Raylib.DrawTextEx(menuFont, text, new Vector2(namePos.X, namePos.Y), fontSize, -2, new Color(252, 45, 193, 136));
                 }
