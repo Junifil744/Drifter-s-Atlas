@@ -16,6 +16,7 @@ namespace Drifters_Atlas {
             );
             Raylib.SetTargetFPS(30);
             Raylib.SetWindowIcon(Raylib.LoadImage("Resources/icon.png"));
+            Raylib.SetExitKey(0);
 
             // Setup Variables
             string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -194,6 +195,8 @@ namespace Drifters_Atlas {
             Sound menuAction = Raylib.LoadSound("Resources/snd_MenuAction.wav");
             Sound errorSound = Raylib.LoadSound("Resources/snd_GenericError.wav");
             Sound loadSaveSfx = Raylib.LoadSound("Resources/snd_CollectModule_V3.wav");
+            Sound menuOpenSfx = Raylib.LoadSound("Resources/snd_MenuOpen.wav");
+            Sound menuCloseSfx = Raylib.LoadSound("Resources/snd_MenuClose.wav");
             Raylib.SetSoundVolume(loadSaveSfx, 0.5f);
             Sound acceptSound = Raylib.LoadSound("Resources/snd_MenuloadComplete.wav");
 
@@ -225,29 +228,31 @@ namespace Drifters_Atlas {
 
             // Run the program
             while (!Raylib.WindowShouldClose()) {
+                #region Updating Values
                 Vector2 menuBoxPos = new Vector2(
                     Raylib.GetScreenWidth() / 2 - menuBoxTexture.Width * menuBoxScale / 2,
                     Raylib.GetScreenHeight() / 2 - menuBoxTexture.Height * menuBoxScale / 2
                 );
                 if (currentMenu != 6) {
-                    // Menu background image properties
-                    if (brightnessIncreasing) {
-                        if (imgBrightness < 60) { imgBrightness++; } else { brightnessIncreasing = false; }
-                    } else {
-                        if (imgBrightness > -60) { imgBrightness--; } else { brightnessIncreasing = true; }
-                    }
-                    Image tempImg = Raylib.ImageCopy(bgImg);
-                    Raylib.ImageColorBrightness(&tempImg, Math.Clamp(imgBrightness / 2, -15, 15));
-                    Raylib.UpdateTexture(menuBgTexture, tempImg.Data);
-                    Raylib.UnloadImage(tempImg);
                     float scaleX = (float)windowWidth / menuBgTexture.Width;
                     float scaleY = (float)windowHeight / menuBgTexture.Height;
-                    menuBgScale = MathF.Max(scaleX, scaleY);
-                    bgPos = new Vector2(
-                        (windowWidth - menuBgTexture.Width * menuBgScale) / 2,
-                        (windowHeight - menuBgTexture.Height * menuBgScale) / 2
-                    );
-
+                    if (currentMenu != 7) {
+                        // Menu background image properties
+                        if (brightnessIncreasing) {
+                            if (imgBrightness < 60) { imgBrightness++; } else { brightnessIncreasing = false; }
+                        } else {
+                            if (imgBrightness > -60) { imgBrightness--; } else { brightnessIncreasing = true; }
+                        }
+                        Image tempImg = Raylib.ImageCopy(bgImg);
+                        Raylib.ImageColorBrightness(&tempImg, Math.Clamp(imgBrightness / 2, -15, 15));
+                        Raylib.UpdateTexture(menuBgTexture, tempImg.Data);
+                        Raylib.UnloadImage(tempImg);
+                        menuBgScale = MathF.Max(scaleX, scaleY);
+                        bgPos = new Vector2(
+                            (windowWidth - menuBgTexture.Width * menuBgScale) / 2,
+                            (windowHeight - menuBgTexture.Height * menuBgScale) / 2
+                        );
+                    }
                     // Menu box properties
                     scaleX = (float)windowWidth / menuBoxTexture.Width / (float)1.4;
                     scaleY = (float)windowHeight / menuBoxTexture.Height / (float)1.4;
@@ -341,15 +346,21 @@ namespace Drifters_Atlas {
                 }
                 // The map.. Dear lord...
                 else if (currentMenu == 6) {
-
+                    backButton.ID = 0;
                     // Manage movement
-                    Raylib.HideCursor();
                     bool up = Raylib.IsKeyDown(KeyboardKey.W) || Raylib.IsKeyDown(KeyboardKey.Up);
                     bool down = Raylib.IsKeyDown(KeyboardKey.S) || Raylib.IsKeyDown(KeyboardKey.Down);
                     bool left = Raylib.IsKeyDown(KeyboardKey.A) || Raylib.IsKeyDown(KeyboardKey.Left);
                     bool right = Raylib.IsKeyDown(KeyboardKey.D) || Raylib.IsKeyDown(KeyboardKey.Right);
                     bool zoomIn = Raylib.IsKeyDown(KeyboardKey.Q) || Raylib.IsKeyDown(KeyboardKey.Kp1);
                     bool zoomOut = Raylib.IsKeyDown(KeyboardKey.E) || Raylib.IsKeyDown(KeyboardKey.Kp2);
+
+                    if(Raylib.IsKeyDown(KeyboardKey.Escape)) {
+                        currentMenu = 7;
+                        Raylib.PlaySound(menuOpenSfx);
+                        Raylib.ShowCursor();
+                    }
+
                     if (Raylib.IsMouseButtonDown(MouseButton.Left) && lastFrameInteracted == false) {
                         lastFrameInteracted = true;
                         retTint = new Color(252, 45, 193);
@@ -358,7 +369,7 @@ namespace Drifters_Atlas {
                         lastFrameInteracted = false;
                         retTint = Color.White;
                     }
-                    debug = !Raylib.IsKeyDown(KeyboardKey.F);
+                    // debug = !Raylib.IsKeyDown(KeyboardKey.F);
 
                     if (up && mapPos.Y < 0) {
                         lastKey = KeyboardKey.W;
@@ -438,6 +449,13 @@ namespace Drifters_Atlas {
                         sprite.Update();
                     }
                 }
+                else if (currentMenu == 7) {
+                    menuName = "Settings";
+                    backButton.ID = 2;
+                    backButton.Update();
+                }
+
+
 
                 // Managing drag N drop.
                 if (Raylib.IsFileDropped() && currentMenu != 6) {
@@ -452,34 +470,24 @@ namespace Drifters_Atlas {
 
                     }
                 }
+                #endregion
 
-                // Drawing things
+                #region Drawing things
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.White);
-                // Draw the background
+                
+                // Draw the background if the map isnt meant to be drawn
                 if (currentMenu != 6) {
-                    Raylib.DrawTextureEx(menuBgTexture, bgPos, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
-                    Raylib.DrawTextEx(menuFont, menuName, new Vector2(textX, textY), 20, -2, new Color(252, 45, 193, 166));
-                    Raylib.DrawTextureEx(
-                        menuBoxTexture,
-                        new Vector2(
-                            windowWidth / 2 - menuBoxTexture.Width * menuBoxScale / 2,
-                            windowHeight / 2 - menuBoxTexture.Height * menuBoxScale / 2
-                        ),
-                        0,
-                        menuBoxScale,
-                        Color.White
-                    );
-
-                    Raylib.DrawTextEx(menuFont, v, new Vector2(windowWidth - Raylib.MeasureTextEx(menuFont, v, fontSize, -2).X, menuBgTexture.Height * menuBgScale - fontSize), fontSize, -2, Color.White);
+                    if(currentMenu != 7) Raylib.DrawTextureEx(menuBgTexture, bgPos, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
                 }
                 if (currentMenu == 0) {
-                    // Draw the controls for main menu
+                    drawMenuBox();
                     exitButton.Draw();
                     loadButton.Draw();
                     helpButton.Draw();
                     creditsButton.Draw();
                 } else if (currentMenu == 1) {
+                    drawMenuBox();
                     save0Button.Draw();
                     save1Button.Draw();
                     save2Button.Draw();
@@ -489,38 +497,58 @@ namespace Drifters_Atlas {
                     Raylib.DrawLine((int)save2Button.rect.X, (int)save2Button.rect.Y, (int)save2Button.rect.X + (int)save2Button.rect.Width, (int)save2Button.rect.Y, new Color(255, 255, 255, 166));
                     Raylib.DrawLine((int)save3Button.rect.X, (int)save3Button.rect.Y, (int)save3Button.rect.X + (int)save3Button.rect.Width, (int)save3Button.rect.Y, new Color(255, 255, 255, 166));
                 } else if (currentMenu == 2) {
+                    drawMenuBox();
                     Raylib.DrawTextEx(menuFont, "Controls\nWASD/Arrow Keys = Move\nQ/Numpad1 = Zoom In\nE/Numpad2 = Zoom out\nR/Numpad3 = Go Underground\n\n\nTHIS IS A VERY EARLY BUILD\nTHINGS WILL CHANGE\nI'm open to any feedback\nYou can contact me at my Discord or at\njunifil@middlemouse.click\nFor any bug reports!\n\n\nAlpha 0.1\nBuilt September 16 2025", new Vector2(menuBoxPos.X + 60, menuBoxPos.Y + 10), fontSize, -2, Color.White);
                 } else if (currentMenu == 3) {
+                    drawMenuBox();
                     Raylib.DrawTextEx(menuFont, "Credits!\n\nJunifil: Coding the whole thing and\n     putting everything together.\nTK: Moral support dawg.", new Vector2(menuBoxPos.X + 60, menuBoxPos.Y + 10), fontSize, -2, Color.White);
-                }
-                if (currentMenu == 6) {
-                    // dear god.
-                    // theres more
-                    // no!
-
-                    Raylib.ClearBackground(Color.Black);
-                    Raylib.DrawTextureEx(mapDrawTex, drawPos, 0, zoom, Color.White);
-                    foreach (MapSprite sprite in spriteList) {
-                        if (underground == sprite.underground || sprite.tag.Contains("noUG")) {
-                            sprite.Draw();
-                            if (debug) Raylib.DrawRectangleLinesEx(sprite.rect, 2 * (zoom / 10), Color.Purple);
-                        }
-                    }
+                } else if (currentMenu == 6) {
+                    drawMap();
                     Raylib.DrawTextureEx(reticuleTex, new Vector2(Raylib.GetMousePosition().X - reticuleTex.Width * 1.5f, Raylib.GetMousePosition().Y - reticuleTex.Height * 1.5f), 0, 3f, retTint);
-
-
+                } else if (currentMenu == 7) {
+                    drawMap();
+                    Raylib.DrawRectangle(0, 0, windowWidth, windowHeight, new Color(0, 0, 0, 120));
+                    drawMenuBox();
                 }
                 if (currentMenu != 6 && currentMenu != 0) {
-                    // Draw back button
+                    // Draw back button when necessary.
                     backButton.Draw();
                 }
                 Vector2 mouseMap = (Raylib.GetMousePosition() - windowCenter) / zoom - mapPos - new Vector2(mapTex.Width / 2, mapTex.Height / 2);
                 if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nScale: {mapTex.Width * zoom},{mapTex.Height * zoom}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\nSave\nMonoliths: {(string)parseSave(currentSave, "tablet")}\nCL: {(string)parseSave(currentSave, "cl")}", 0, 0, 20, Color.Pink);
 
                 Raylib.EndDrawing();
+                #endregion
             }
 
             Raylib.CloseWindow();
+
+            // Menu Drawing Functions
+            void drawMap() {
+                Raylib.ClearBackground(Color.Black);
+                Raylib.DrawTextureEx(mapDrawTex, drawPos, 0, zoom, Color.White);
+                foreach (MapSprite sprite in spriteList) {
+                    if (underground == sprite.underground || sprite.tag.Contains("noUG")) {
+                        sprite.Draw();
+                        if (debug) Raylib.DrawRectangleLinesEx(sprite.rect, 2 * (zoom / 10), Color.Purple);
+                    }
+                }
+            }
+            void drawMenuBox() {
+                Raylib.DrawTextEx(menuFont, menuName, new Vector2(textX, textY), 20, -2, new Color(252, 45, 193, 166));
+                Raylib.DrawTextureEx(
+                    menuBoxTexture,
+                    new Vector2(
+                        windowWidth / 2 - menuBoxTexture.Width * menuBoxScale / 2,
+                        windowHeight / 2 - menuBoxTexture.Height * menuBoxScale / 2
+                    ),
+                    0,
+                    menuBoxScale,
+                    Color.White
+                );
+
+                Raylib.DrawTextEx(menuFont, v, new Vector2(windowWidth - Raylib.MeasureTextEx(menuFont, v, fontSize, -2).X, menuBgTexture.Height * menuBgScale - fontSize), fontSize, -2, Color.White);
+            }
 
             // Menu Button functions.
             void mainMenuButtonClick(int ID) {
@@ -538,9 +566,15 @@ namespace Drifters_Atlas {
                 }
             }
             void backButtonClick(int ID) {
-                Raylib.SetSoundPitch(menuAction, 0.5f);
-                Raylib.PlaySound(menuAction);
-                currentMenu = 0;
+                if (backButton.ID == 0) {
+                    Raylib.SetSoundPitch(menuAction, 0.5f);
+                    Raylib.PlaySound(menuAction);
+                    currentMenu = 0;
+                } else {
+                    Raylib.PlaySound(menuCloseSfx);
+                    lastFrameInteracted = true;
+                    currentMenu = 6;
+                }
             }
             void loadSave(int ID) {
                 if (ID == 10) {
@@ -552,6 +586,7 @@ namespace Drifters_Atlas {
                     Raylib.PlaySound(acceptSound);
                     currentMenu = 6;
                     currentSave = ID;
+                    Raylib.HideCursor();
                 } else Raylib.PlaySound(errorSound);
             }
 
@@ -631,7 +666,7 @@ namespace Drifters_Atlas {
                 else if ((double)parseSave(button.ID, "cape") == 11) difficulty = "New Game +";
                 else difficulty = "Standard";
 
-                save1Button.text =
+                button.text =
                 (string)parseSave(button.ID, "gameName") + "\n" +
                 time + "\n" +
                 DateTime.FromOADate((double)parseSave(button.ID, "dateTime")).ToString("MM/dd/yy") + " . " + difficulty;
