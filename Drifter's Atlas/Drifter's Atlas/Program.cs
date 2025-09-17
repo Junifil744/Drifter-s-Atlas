@@ -477,9 +477,7 @@ namespace Drifters_Atlas {
                 Raylib.ClearBackground(Color.White);
                 
                 // Draw the background if the map isnt meant to be drawn
-                if (currentMenu != 6) {
-                    if(currentMenu != 7) Raylib.DrawTextureEx(menuBgTexture, bgPos, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
-                }
+                if(currentMenu != 7) Raylib.DrawTextureEx(menuBgTexture, bgPos, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
                 if (currentMenu == 0) {
                     drawMenuBox();
                     exitButton.Draw();
