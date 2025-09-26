@@ -23,7 +23,7 @@ namespace Drifters_Atlas {
             // Setup Variables
             // string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.1".ToString();
             string v = "Alpha 0.2.9399";
-            bool debug = true;
+            bool debug = false;
             int currentMenu = 0;
             int windowWidth = Raylib.GetScreenWidth();
             int windowHeight = Raylib.GetScreenHeight();
@@ -354,7 +354,7 @@ namespace Drifters_Atlas {
                     bool zoomIn = Raylib.IsKeyDown(KeyboardKey.Q) || Raylib.IsKeyDown(KeyboardKey.Kp1);
                     bool zoomOut = Raylib.IsKeyDown(KeyboardKey.E) || Raylib.IsKeyDown(KeyboardKey.Kp2);
                     // hideMenu = Raylib.IsKeyDown(KeyboardKey.Tab);
-                    debug = Raylib.IsKeyDown(KeyboardKey.F);
+                    // debug = Raylib.IsKeyDown(KeyboardKey.F);
 
                     if (Raylib.IsKeyDown(KeyboardKey.Escape)) {
                         currentMenu = 7;
