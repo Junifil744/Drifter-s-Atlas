@@ -21,8 +21,8 @@ namespace Drifters_Atlas {
             Raylib.SetExitKey(0);
             // TODO Clean this area
             // Setup Variables
-            string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.1".ToString();
-            // string v = "Alpha 0.1.9390";
+            // string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.1".ToString();
+            string v = "Alpha 0.2.9399";
             bool debug = true;
             int currentMenu = 0;
             int windowWidth = Raylib.GetScreenWidth();
@@ -45,7 +45,7 @@ namespace Drifters_Atlas {
                 new Vector2(10, windowHeight - (windowHeight / 10) - 10),
                 new Vector2(windowWidth - 20, windowHeight / 10)
             );
-            bool hideMenu = false;
+            // bool hideMenu = false;
 
             // Menu Values
             int imgBrightness = 0;
@@ -96,6 +96,15 @@ namespace Drifters_Atlas {
             // Map Menu related images.
             Texture2D roomOverlayOn = Raylib.LoadTexture("Resources/mapControls/roomOverlayOn.png");
             Texture2D roomOverlayOff = Raylib.LoadTexture("Resources/mapControls/roomOverlayOff.png");
+            Texture2D moduleMarkerUG = Raylib.LoadTexture("Resources/mapControls/moduleMarkerUg.png");
+            Texture2D moduleMarkerAny = Raylib.LoadTexture("Resources/mapControls/moduleMarkerAny.png");
+            Texture2D moduleVisOn = Raylib.LoadTexture("Resources/mapControls/moduleVisOn.png");
+            Texture2D moduleVisOff = Raylib.LoadTexture("Resources/mapControls/moduleVisOff.png");
+            Texture2D monolithMarkerUG = Raylib.LoadTexture("Resources/mapControls/monolithMarkerUg.png");
+            Texture2D monolithMarkerAny = Raylib.LoadTexture("Resources/mapControls/monolithMarkerAny.png");
+            Texture2D monolithVisOn = Raylib.LoadTexture("Resources/mapControls/monolithVisOn.png");
+            Texture2D monolithVisOff = Raylib.LoadTexture("Resources/mapControls/monolithVisOff.png");
+
 
             #region Load Sprites List
             // Textures
@@ -259,7 +268,12 @@ namespace Drifters_Atlas {
 
             // Map Menu Buttons
             Menu mapMenu = new Menu("Map", Menu.MenuType.Map, mapMenuRect, 30);
-            Button roomOverlayButton = new Button("", 0, Button.ButtonType.Map, roomOverlayOff, mapMenu, mapButtonClick, roomOverlayOn);
+            Button roomOverlayButton = new Button(0, roomOverlayOff, roomOverlayOn, ref mapMenu, mapButtonClick, false);
+            Button moduleVisibilityButton = new Button(1, moduleMarkerAny, moduleMarkerUG, ref mapMenu, mapButtonClick, true, "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
+            Button moduleToggleButton = new Button(2, moduleVisOn, moduleVisOff, ref mapMenu, mapButtonClick, false, "Modules are hidden", "Modules are shown");
+            Button monolithVisibilityButton = new Button(3, monolithMarkerAny, monolithMarkerUG, ref mapMenu, mapButtonClick, true, "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
+            Button monolithToggleButton = new Button(4, monolithVisOn, monolithVisOff, ref mapMenu, mapButtonClick, false, "Monoliths are hidden", "Monoliths are shown");
+
             #endregion
 
             // Run the program
@@ -339,7 +353,7 @@ namespace Drifters_Atlas {
                     bool right = Raylib.IsKeyDown(KeyboardKey.D) || Raylib.IsKeyDown(KeyboardKey.Right);
                     bool zoomIn = Raylib.IsKeyDown(KeyboardKey.Q) || Raylib.IsKeyDown(KeyboardKey.Kp1);
                     bool zoomOut = Raylib.IsKeyDown(KeyboardKey.E) || Raylib.IsKeyDown(KeyboardKey.Kp2);
-                    hideMenu = Raylib.IsKeyDown(KeyboardKey.Tab);
+                    // hideMenu = Raylib.IsKeyDown(KeyboardKey.Tab);
                     debug = Raylib.IsKeyDown(KeyboardKey.F);
 
                     if (Raylib.IsKeyDown(KeyboardKey.Escape)) {
@@ -359,7 +373,7 @@ namespace Drifters_Atlas {
                             }
                         }
                         if(valid) Raylib.PlaySound(acceptSound);
-                        else Raylib.PlaySound(errorSound); // Not fully implemented yet. Wait for Beta 1.0
+                        else Raylib.PlaySound(errorSound);
                     } else if (Raylib.IsMouseButtonUp(MouseButton.Left)) {
                         lastFrameInteracted = false;
                         retTint = Color.White;
@@ -388,7 +402,7 @@ namespace Drifters_Atlas {
                     if ((Raylib.IsKeyDown(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) && lastFrameUGSw == false) {
                         underground = !underground;
                         lastFrameUGSw = true;
-                        Raylib.PlaySound(acceptSound);
+                        Raylib.PlaySound(menuOpenSfx);
                     }
                     if (Raylib.IsKeyUp(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) {
                         lastFrameUGSw = false;
@@ -450,7 +464,7 @@ namespace Drifters_Atlas {
                     // menuName = "Settings";
                     backButton.rect = new Rectangle(
                         menuRect.X + menuRect.Width - (menuRect.Width / 4) - (10 * menuBoxScale),
-                        menuRect.Y + menuRect.Height + 2,
+                        menuRect.Y + menuRect.Height,
                         menuRect.Width / 4,
                         menuRect.Height / 10
                     );
@@ -495,7 +509,7 @@ namespace Drifters_Atlas {
                 }
                 else if (currentMenu == 2) {
                     helpMenu.Draw();
-                    Raylib.DrawTextEx(menuFont, "Controls\nWASD/Arrow Keys = Move\nQ/Numpad1 = Zoom In\nE/Numpad2 = Zoom out\nR/Numpad3 = Go Underground\n\n\nTHIS IS A VERY EARLY BUILD\nI'm open to any feedback\nYou can contact me at:\nMy Discord (Junifil)\nEmail (junifil@middlemouse.click)\n\n\nAlpha 0.2\nBuilt September 24 2025", new Vector2(menuRect.X + (20 * menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize, -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, "Controls\nWASD/Arrow Keys = Move\nQ/Numpad1 = Zoom In\nE/Numpad2 = Zoom out\nR/Numpad3 = Go Underground\nESC = Show pause menu\n\nTHIS IS A VERY EARLY BUILD\nI'm open to any feedback\nYou can contact me at:\nMy Discord (Junifil)\nEmail (junifil@middlemouse.click)\n\nAlpha 0.2\nBuilt September 25 2025", new Vector2(menuRect.X + (20 * menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize, -2, Color.White);
                 }
                 else if (currentMenu == 3) {
                     creditsMenu.Draw();
@@ -503,9 +517,11 @@ namespace Drifters_Atlas {
                 }
                 else if (currentMenu == 6) {
                     drawMap();
-                    if(!hideMenu) {
+                    // if(!hideMenu) {
                         mapMenu.Draw();
-                    }
+
+                        foreach (Button button in mapMenu.buttonList) if(button.hovering) button.DrawToolTip();
+                    // }
                     Raylib.DrawTextureEx(reticuleTex, new Vector2(Raylib.GetMousePosition().X - reticuleTex.Width * 1.5f, Raylib.GetMousePosition().Y - reticuleTex.Height * 1.5f), 0, 3f, retTint);
                 }
                 else if (currentMenu == 7) {
@@ -594,7 +610,12 @@ namespace Drifters_Atlas {
                 Raylib.DrawTextureEx(mapDrawTex, drawPos, 0, zoom, Color.White);
                 if(roomOverlayButton.enabled && !underground) Raylib.DrawTextureEx(mapRoomOverlayTex, drawPos, 0, zoom, Color.White);
                 foreach (MapSprite sprite in spriteList) {
-                    if (underground == sprite.underground || sprite.tag.Contains("noUG")) {
+                    if (sprite.type == MapSprite.SpriteType.Module && moduleToggleButton.enabled) continue;
+                    else if (sprite.type == MapSprite.SpriteType.Monolith && monolithToggleButton.enabled) continue;
+                    if (underground == sprite.underground || sprite.tag.Contains("noUG")
+                        || (!moduleVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Module)
+                        || (!monolithVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Monolith)
+                    ) {
                         sprite.Draw();
                         if (debug) Raylib.DrawRectangleLinesEx(sprite.rect, 2 * (zoom / 10), Color.Purple);
                     }
@@ -684,7 +705,7 @@ namespace Drifters_Atlas {
     }
 
     unsafe class Button{
-        public enum ButtonType : ushort {
+        public enum ButtonType : byte {
             None = 0, // Never to be used. Wont load anything. Its just useful to define a variable to be none when initialized.
             Menu = 1, // Menu buttons
             SaveSelect = 2, // Selecting a save, this one has support for images and will need more than 1 label. Text content is not chooseable
@@ -712,6 +733,8 @@ namespace Drifters_Atlas {
         private string[] props;
         private Vector2 drifterPos = Vector2.Zero;
         private int fontSize = 25;
+        private string enabledToolTip = string.Empty;
+        private string disabledToolTip = string.Empty;
 
         public Button(string text, int ID, ButtonType type, Texture2D? image, Menu? parentMenu = null, buttonClick onClick = null, Texture2D? altImage = null) {
             this.ID = ID;
@@ -730,6 +753,20 @@ namespace Drifters_Atlas {
             }
         }
 
+        public Button(int ID, Texture2D disabledImage, Texture2D enabledImage, ref Menu parentMenu, buttonClick onClick, bool? enabled = null, string? enabledToolTip = null, string? disabledToolTip = null) {
+            this.ID = ID;
+            image = disabledImage;
+            altImage = enabledImage;
+            this.parentMenu = parentMenu;
+            parentMenu.buttonList.Add(this);
+            this.onClick = onClick;
+            this.enabled = enabled ?? false;
+            this.enabledToolTip = enabledToolTip ?? string.Empty;
+            this.disabledToolTip = disabledToolTip ?? string.Empty;
+            type = ButtonType.Map;
+            Raylib.SetTextureFilter(menuFont.Texture, TextureFilter.Point);
+        }
+
         public void Update() {
             if(type != ButtonType.Map && type != ButtonType.Back) {
                 rect = new Rectangle(
@@ -740,11 +777,15 @@ namespace Drifters_Atlas {
                 );
             } else if(type == ButtonType.Map) {
                 rect = new Rectangle(
-                    parentMenu.rect.X + ((parentMenu.rect.Y + 1) * ID) + 4,
+                    parentMenu.rect.X + ((parentMenu.rect.Height - 6) * ID) + 4,
                     parentMenu.rect.Y + 4,
                     parentMenu.rect.Height - 8,
                     parentMenu.rect.Height - 8
                 );
+                if (enabled) text = enabledToolTip;
+                else text = disabledToolTip;
+                namePos = Raylib.MeasureTextEx(menuFont, text, fontSize / 2, -2f);
+                textPos = new Vector2(Raylib.GetMousePosition().X + 30, Raylib.GetMousePosition().Y - namePos.Y/2);
             }
 
             Rectangle mouseRect = new Rectangle(Raylib.GetMousePosition().X, Raylib.GetMousePosition().Y, 1, 1);
@@ -767,7 +808,7 @@ namespace Drifters_Atlas {
                     );
                     drifterPos = new Vector2(rect.X + rect.Width - image.Width * 3 - 30, rect.Y + rect.Height/2 - image.Height*3/2);
                 }
-            } else {
+            } else if (type != ButtonType.Map) {
                 textPos = new Vector2(
                     rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, text, fontSize, -2f).X) / 2,
                     rect.Y + (rect.Height - fontSize) / 2
@@ -816,19 +857,24 @@ namespace Drifters_Atlas {
                     rect.Width / image.Width,
                     rect.Height / image.Height
                 );
-                Color tint = Color.White;
-                if (hovering) tint = new Color(200, 200, 200);
+                Color tint = new Color(200, 200, 200);
+                if (!hovering) tint = Color.White;
 
                 if (enabled) Raylib.DrawTextureEx(altImage, new Vector2(rect.X, rect.Y), 0, scale, tint);
                 else Raylib.DrawTextureEx(image, new Vector2(rect.X, rect.Y), 0, scale, tint);
-                
             }
+        }
+
+        public void DrawToolTip() {
+            Raylib.DrawRectangle((int)textPos.X, (int)textPos.Y, (int)namePos.X, (int)namePos.Y, new Color(32, 32, 32));
+            Raylib.DrawRectangleLinesEx(new Rectangle(textPos, namePos), 2, new Color(22, 22, 22));
+            Raylib.DrawTextEx(menuFont, text, textPos, fontSize / 2, -2f, Color.White);
         }
         public delegate void buttonClick(Button sender, int ID);
     }
 
     unsafe class MapSprite {
-        public enum SpriteType : ushort {
+        public enum SpriteType : byte {
             None = 0,
             Drifter = 1,
             Boss = 2,
@@ -902,7 +948,7 @@ namespace Drifters_Atlas {
     }
 
     unsafe class Menu {
-        public enum MenuType : ushort { // solely used to define what the box is meant to look like.
+        public enum MenuType : byte { // solely used to define what the box is meant to look like.
             None = 0, 
             Menu = 1,
             Map = 2,
