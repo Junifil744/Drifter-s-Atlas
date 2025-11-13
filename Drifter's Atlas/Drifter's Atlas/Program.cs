@@ -23,7 +23,7 @@ namespace Drifters_Atlas {
             // Setup Variables
             // string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.1".ToString();
             string v = "Alpha 0.2.9399";
-            bool debug = false;
+            bool debug = true;
             int currentMenu = 0;
             int windowWidth = Raylib.GetScreenWidth();
             int windowHeight = Raylib.GetScreenHeight();
@@ -120,40 +120,37 @@ namespace Drifters_Atlas {
             Texture2D mapAbyssModuleActive = Raylib.LoadTexture("Resources/spr_MapAbyssModule_1.png");
             Texture2D mapModule = Raylib.LoadTexture("Resources/spr_MapModuleMarker_1.png");
             Texture2D mapModuleActive = Raylib.LoadTexture("Resources/spr_MapModuleMarker_0.png");
+            Texture2D mapBoss = Raylib.LoadTexture("Resources/spr_MapTowerLock_0.png");
+            Texture2D mapBossActive = Raylib.LoadTexture("Resources/spr_MapTowerLock_1.png");
             // Controls
             List<MapSprite> spriteList = new List<MapSprite>();
             // spriteList.Add(new MapSprite(mapDrifter, MapSprite.SpriteType.AbyssCenter, new Vector2(10, 0), mapADrifter)); // FOR A LATER UPDATE.
-            spriteList.Add(new MapSprite(mapAbyssBaseActive, MapSprite.SpriteType.AbyssCenter, new Vector2(-13.5f, 33.5f), false, mapAbyssBase));
-            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(3.5f, 31.5f), false, mapAbyssPillar, 0));
-            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-13.5f, 14.5f), false, mapAbyssPillar, 1));
-            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-30.5f, 31.5f), false, mapAbyssPillar, 2));
-            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-13.5f, 48.5f), false, mapAbyssPillar, 3));
+            spriteList.Add(new MapSprite(mapAbyssBaseActive, MapSprite.SpriteType.AbyssCenter, new Vector2(-13.5f, 33.5f), false, mapAbyssBase, 0, "noUG"));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(3.5f, 31.5f), false, mapAbyssPillar, 0, "noUG"));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-13.5f, 14.5f), false, mapAbyssPillar, 1, "noUG"));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-30.5f, 31.5f), false, mapAbyssPillar, 2, "noUG"));
+            spriteList.Add(new MapSprite(mapAbyssPillarActive, MapSprite.SpriteType.AbyssPillar, new Vector2(-13.5f, 48.5f), false, mapAbyssPillar, 3, "noUG"));
 
             // South
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-11.5f, 39f), false, mapAbyssModule, 1)); // East
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 41f), false, mapAbyssModule, 2)); // South
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-15.5f, 39f), false, mapAbyssModule, 3)); // West
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 37f), false, mapAbyssModule, 4)); // North
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-11.5f, 39f), false, mapAbyssModule, 1, "noUG")); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 41f), false, mapAbyssModule, 2, "noUG")); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-15.5f, 39f), false, mapAbyssModule, 3, "noUG")); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 37f), false, mapAbyssModule, 4, "noUG")); // North
             // East
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-6.5f, 34f), false, mapAbyssModule, 5)); // East
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-8.5f, 36f), false, mapAbyssModule, 6)); // South
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-10.5f, 34f), false, mapAbyssModule, 7)); // West
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-8.5f, 32f), false, mapAbyssModule, 8)); // North
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-6.5f, 34f), false, mapAbyssModule, 5, "noUG")); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-8.5f, 36f), false, mapAbyssModule, 6, "noUG")); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-10.5f, 34f), false, mapAbyssModule, 7, "noUG")); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-8.5f, 32f), false, mapAbyssModule, 8, "noUG")); // North
             // North
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-11.5f, 30f), false, mapAbyssModule, 9)); // East
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 32f), false, mapAbyssModule, 10)); // South
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-15.5f, 30f), false, mapAbyssModule, 11)); // West
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 28f), false, mapAbyssModule, 12)); // North
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-11.5f, 30f), false, mapAbyssModule, 9, "noUG")); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 32f), false, mapAbyssModule, 10, "noUG")); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-15.5f, 30f), false, mapAbyssModule, 11, "noUG")); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-13.5f, 28f), false, mapAbyssModule, 12, "noUG")); // North
             // West
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-16.5f, 34f), false, mapAbyssModule, 13)); // East
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-18.5f, 36f), false, mapAbyssModule, 14)); // South
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-20.5f, 34f), false, mapAbyssModule, 15)); // West
-            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-18.5f, 32f), false, mapAbyssModule, 16)); // North
-
-
-            for (int i = 0; i < 21; i++) {
-                spriteList[i].tag = "noUG";
-            }
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-16.5f, 34f), false, mapAbyssModule, 13, "noUG")); // East
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-18.5f, 36f), false, mapAbyssModule, 14, "noUG")); // South
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-20.5f, 34f), false, mapAbyssModule, 15, "noUG")); // West
+            spriteList.Add(new MapSprite(mapAbyssModuleActive, MapSprite.SpriteType.AbyssModule, new Vector2(-18.5f, 32f), false, mapAbyssModule, 16, "noUG")); // North
 
             // Warp Zones
             spriteList.Add(new MapSprite(mapWarpZone, MapSprite.SpriteType.Warp, new Vector2(-67.5f, 2), false, 0));
@@ -219,6 +216,13 @@ namespace Drifters_Atlas {
             spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(154.5f, 346), true, mapModule, -386457));
             spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(109.5f, 355), true, mapModule, -398635));
             spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-13.5f, 499), true, mapModule, -417825));
+
+            // Boss icons
+            spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(639, -149), true, mapBossActive, 0, "noUG"));
+            spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(8, -531), false, mapBossActive, 1, "noUG"));
+            spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(-688, -129), false, mapBossActive, 2, "noUG"));
+            spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(33, 324), false, mapBossActive, 3, "noUG"));
+
             #endregion
 
             // Load font
@@ -437,7 +441,7 @@ namespace Drifters_Atlas {
                                 if (sprite.collected) break;
                             }
                             
-                        } else if (sprite.type == MapSprite.SpriteType.AbyssPillar) {
+                        } else if (sprite.type == MapSprite.SpriteType.AbyssPillar || sprite.type == MapSprite.SpriteType.Boss) { // Pillar && Boss collected
                             sprite.collected = ((string)parseSave(currentSave, "well")).Contains(sprite.ID.ToString());
                         } else if (sprite.type == MapSprite.SpriteType.AbyssCenter) {
                             sprite.collected = parseCL(currentSave, 6).Length >= 4 && parseCL(currentSave, 7).Length >= 4 && parseCL(currentSave, 8).Length >= 4 && parseCL(currentSave, 9).Length >= 4;
@@ -906,19 +910,21 @@ namespace Drifters_Atlas {
         public bool underground = false;
         public bool collected = false;
 
-        public MapSprite(Texture2D tex, SpriteType sType, Vector2 pos, bool underground, Texture2D? altTex = null, int? id = null) {
+        public MapSprite(Texture2D tex, SpriteType sType, Vector2 pos, bool underground, Texture2D? altTex = null, int? id = null, string? tag = null) {
             ID = id ?? 0;
             type = sType;
             sprite = tex;
             altSprite = altTex;
             localPosition = pos;
+            tag = tag ?? string.Empty;
             this.underground = underground;
         }
-        public MapSprite(Image tex, SpriteType sType, Vector2 pos, bool underground, int? id = null) {
+        public MapSprite(Image tex, SpriteType sType, Vector2 pos, bool underground, int? id = null, string? tag = null) {
             ID = id ?? 0;
             this.underground = underground;
             type = sType;
             localPosition = pos;
+            tag = tag ?? string.Empty;
             Image tmpImg = Raylib.ImageCopy(tex);
             sprite = Raylib.LoadTextureFromImage(tmpImg);
             Raylib.ImageFormat(ref tmpImg, PixelFormat.UncompressedGrayAlpha);
