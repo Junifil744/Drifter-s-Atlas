@@ -916,7 +916,7 @@ namespace Drifters_Atlas {
             sprite = tex;
             altSprite = altTex;
             localPosition = pos;
-            tag = tag ?? string.Empty;
+            this.tag = tag ?? string.Empty;
             this.underground = underground;
         }
         public MapSprite(Image tex, SpriteType sType, Vector2 pos, bool underground, int? id = null, string? tag = null) {
@@ -924,7 +924,7 @@ namespace Drifters_Atlas {
             this.underground = underground;
             type = sType;
             localPosition = pos;
-            tag = tag ?? string.Empty;
+            this.tag = tag ?? string.Empty;
             Image tmpImg = Raylib.ImageCopy(tex);
             sprite = Raylib.LoadTextureFromImage(tmpImg);
             Raylib.ImageFormat(ref tmpImg, PixelFormat.UncompressedGrayAlpha);
