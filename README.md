@@ -44,6 +44,7 @@ You can contact me at:<br>
 - [ ] All collectible types added.
 
 ### Beta 1.0 (QoL Update)
+- [ ] Saving the user config and having a button to remove said config.
 - [ ] Adding the ghost/robot on the save load screen.
 - [ ] Interacting with collectibles.
 - [ ] Adding collectibles tips.
