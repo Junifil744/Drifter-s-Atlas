@@ -122,6 +122,8 @@ namespace Drifters_Atlas {
             Texture2D mapModuleActive = Raylib.LoadTexture("Resources/spr_MapModuleMarker_0.png");
             Texture2D mapBoss = Raylib.LoadTexture("Resources/spr_MapTowerLock_0.png");
             Texture2D mapBossActive = Raylib.LoadTexture("Resources/spr_MapTowerLock_1.png");
+            Image mapPistol = Raylib.LoadImage("Resources/spr_Pistol.png");
+            Image mapZeliska = Raylib.LoadImage("Resources/spr_Zeliska.png");
             // Controls
             List<MapSprite> spriteList = new List<MapSprite>();
             // spriteList.Add(new MapSprite(mapDrifter, MapSprite.SpriteType.AbyssCenter, new Vector2(10, 0), mapADrifter)); // FOR A LATER UPDATE.
@@ -217,12 +219,15 @@ namespace Drifters_Atlas {
             spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(109.5f, 355), true, mapModule, -398635));
             spriteList.Add(new MapSprite(mapModuleActive, MapSprite.SpriteType.Module, new Vector2(-13.5f, 499), true, mapModule, -417825));
 
-            // Boss icons
+            // Boss
             spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(639, -149), true, mapBossActive, 0, "noUG"));
             spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(8, -531), false, mapBossActive, 1, "noUG"));
             spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(-688, -129), false, mapBossActive, 2, "noUG"));
             spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(33, 324), false, mapBossActive, 3, "noUG"));
 
+            // Guns
+            spriteList.Add(new MapSprite(mapPistol, MapSprite.SpriteType.Gun, new Vector2(33, 324), true, 1));
+            spriteList.Add(new MapSprite(mapPistol, MapSprite.SpriteType.Gun, new Vector2(33, 324), true, 1));
             #endregion
 
             // Load font
