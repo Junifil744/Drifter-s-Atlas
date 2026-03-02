@@ -401,4 +401,4 @@ FodyWeavers.xsd
 *.sln.iml
 Drifter's Atlas/.editorconfig
 
-.idea/*
+Drifter's Atlas/.idea/*
