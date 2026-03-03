@@ -34,7 +34,7 @@ You can contact me at:<br>
 
 ### Alpha 0.3 (Polishing Update)
 - [X] Updating the buttons' look to be cleaner
-- [ ] Making the buttons have 3 states (1 button instead of 2 for each collectible)
+- [X] Making the buttons have 3 states (1 button instead of 2 for each collectible)
 - [X] Adding a few more collectible types (gun, bosses)
 - [ ] Polishing animations and design
 - [ ] Automatic menu text wrap
@@ -44,7 +44,7 @@ You can contact me at:<br>
 - [ ] All collectible types added.
 
 ### Beta 1.0 (QoL Update)
-- [ ] Saving the user config and having a button to remove said config.
+- [ ] Saving the user config and having a button to remove said config.
 - [ ] Adding the ghost/robot on the save load screen.
 - [ ] Interacting with collectibles.
 - [ ] Adding collectibles tips.
