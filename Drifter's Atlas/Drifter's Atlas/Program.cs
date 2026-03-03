@@ -105,7 +105,13 @@ namespace Drifters_Atlas {
             Texture2D monolithMarkerAny = Raylib.LoadTexture("Resources/mapControls/monolithMarkerAny.png");
             Texture2D monolithVisOn = Raylib.LoadTexture("Resources/mapControls/monolithVisOn.png");
             Texture2D monolithVisOff = Raylib.LoadTexture("Resources/mapControls/monolithVisOff.png");
-
+            Texture2D gunMarkerUG = Raylib.LoadTexture("Resources/mapControls/gunMarkerUg.png");
+            Texture2D gunMarkerAny = Raylib.LoadTexture("Resources/mapControls/gunMarkerAny.png");
+            Texture2D gunVisOn = Raylib.LoadTexture("Resources/mapControls/gunVisOn.png");
+            Texture2D gunVisOff = Raylib.LoadTexture("Resources/mapControls/gunVisOff.png");
+            
+            Texture2D mapUgOff = Raylib.LoadTexture("Resources/mapControls/spr_MapLabIcon_0.png");
+            Texture2D mapUgOn = Raylib.LoadTexture("Resources/mapControls/spr_MapLabIcon_1.png");
 
             #region Load Sprites List
             // Textures
@@ -288,11 +294,14 @@ namespace Drifters_Atlas {
 
             // Map Menu Buttons
             Menu mapMenu = new Menu("Map", Menu.MenuType.Map, mapMenuRect, 30);
-            Button roomOverlayButton = new Button(0, roomOverlayOff, roomOverlayOn, ref mapMenu, mapButtonClick, false);
-            Button moduleVisibilityButton = new Button(1, moduleMarkerAny, moduleMarkerUG, ref mapMenu, mapButtonClick, true, "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
-            Button moduleToggleButton = new Button(2, moduleVisOn, moduleVisOff, ref mapMenu, mapButtonClick, false, "Modules are hidden", "Modules are shown");
-            Button monolithVisibilityButton = new Button(3, monolithMarkerAny, monolithMarkerUG, ref mapMenu, mapButtonClick, true, "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
-            Button monolithToggleButton = new Button(4, monolithVisOn, monolithVisOff, ref mapMenu, mapButtonClick, false, "Monoliths are hidden", "Monoliths are shown");
+            Button ugToggleButton = new Button(0, mapUgOff, mapUgOn, ref mapMenu, mapButtonClick, false);
+            Button roomOverlayButton = new Button(1, roomOverlayOff, roomOverlayOn, ref mapMenu, mapButtonClick, false);
+            Button moduleVisibilityButton = new Button(2, moduleMarkerAny, moduleMarkerUG, ref mapMenu, mapButtonClick, true, "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
+            Button moduleToggleButton = new Button(3, moduleVisOn, moduleVisOff, ref mapMenu, mapButtonClick, false, "Modules are hidden", "Modules are shown");
+            Button monolithVisibilityButton = new Button(4, monolithMarkerAny, monolithMarkerUG, ref mapMenu, mapButtonClick, true, "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
+            Button monolithToggleButton = new Button(5, monolithVisOn, monolithVisOff, ref mapMenu, mapButtonClick, false, "Monoliths are hidden", "Monoliths are shown");
+            Button gunVisibilityButton = new Button(6, gunMarkerAny, gunMarkerUG, ref mapMenu, mapButtonClick, false, "Guns can only be seen in their respective layer (above/underground)", "Guns can be seen in both layers");
+            Button gunToggleButton = new Button(7, gunVisOn, gunVisOff, ref mapMenu, mapButtonClick, false, "Guns are hidden", "Guns are shown");
 
             #endregion
 
@@ -328,6 +337,7 @@ namespace Drifters_Atlas {
                 // Main Menu
                 if (currentMenu == 0) {
                     foreach (Button button in mainMenu.buttonList) button.Update(); // Avoids updating the menu, we just need to update the buttons.
+                                                                                    // ...Until we allow rescaling! -Ash
                 }
                 // Load Save
                 else if (currentMenu == 1) {
@@ -422,6 +432,7 @@ namespace Drifters_Atlas {
                     if ((Raylib.IsKeyDown(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) && lastFrameUGSw == false) {
                         underground = !underground;
                         lastFrameUGSw = true;
+                        ugToggleButton.enabled = underground;
                         Raylib.PlaySound(menuOpenSfx);
                     }
                     if (Raylib.IsKeyUp(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) {
@@ -513,7 +524,7 @@ namespace Drifters_Atlas {
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.White);
 
-                // Draw the background if the map isnt meant to be drawn
+                // Draw the background if the map isn't meant to be drawn
                 if (currentMenu != 7 && currentMenu != 6) {
                     Raylib.DrawTextureEx(menuBgTexture, bgPos, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
                     Raylib.DrawTextEx(menuFont, v, new Vector2(windowWidth - Raylib.MeasureTextEx(menuFont, v, fontSize, -2).X, menuBgTexture.Height * menuBgScale - fontSize), fontSize, -2, Color.White);
@@ -623,7 +634,9 @@ namespace Drifters_Atlas {
                     backButton.ID = 99;
                 }
             }
-            void mapButtonClick(Button sender, int ID) {
+            void mapButtonClick(Button sender, int ID)
+            {
+                if (ID == 0) underground = !underground;
                 sender.enabled = !sender.enabled;
             }
             // Helper functions
@@ -634,9 +647,11 @@ namespace Drifters_Atlas {
                 foreach (MapSprite sprite in spriteList) {
                     if (sprite.type == MapSprite.SpriteType.Module && moduleToggleButton.enabled) continue;
                     else if (sprite.type == MapSprite.SpriteType.Monolith && monolithToggleButton.enabled) continue;
+                    else if (sprite.type == MapSprite.SpriteType.Gun && gunToggleButton.enabled) continue;
                     if (underground == sprite.underground || sprite.tag.Contains("noUG")
                         || (!moduleVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Module)
                         || (!monolithVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Monolith)
+                        || (!gunVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Gun)
                     ) {
                         sprite.Draw();
                         if (debug) Raylib.DrawRectangleLinesEx(sprite.rect, 2 * (zoom / 10), Color.Purple);
