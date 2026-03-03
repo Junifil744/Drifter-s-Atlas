@@ -226,8 +226,8 @@ namespace Drifters_Atlas {
             spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(33, 324), false, mapBossActive, 3, "noUG"));
 
             // Guns
-            spriteList.Add(new MapSprite(mapPistol, MapSprite.SpriteType.Gun, new Vector2(33, 324), true, 1));
-            spriteList.Add(new MapSprite(mapPistol, MapSprite.SpriteType.Gun, new Vector2(33, 324), true, 1));
+            spriteList.Add(new MapSprite(mapPistol, MapSprite.SpriteType.Gun, new Vector2(-145.5f, -126), true, 1));
+            spriteList.Add(new MapSprite(mapZeliska, MapSprite.SpriteType.Gun, new Vector2(-688, -87.5f), false, 5));
             #endregion
 
             // Load font
