@@ -34,9 +34,8 @@ You can contact me at:<br>
 
 ### Alpha 0.3 (Polishing Update)
 - [ ] Updating the buttons' look to be cleaner
-- [ ] Adding a few more collectible types (gun, bosses)
+- [X] Adding a few more collectible types (gun, bosses)
 - [ ] Polishing animations and design
-- [ ] Drifter display on the map.
 - [ ] Automatic menu text wrap
 - [ ] Properly managing every possible screen sizes.
 
@@ -49,6 +48,7 @@ You can contact me at:<br>
 - [ ] Interacting with collectibles.
 - [ ] Adding collectibles tips.
 - [ ] Finalizing the menu.
+- [ ] Drifter display on the map.
 - [ ] Live refreshing of the save, or having a button meant for it.
 
 ### Release 1.0
