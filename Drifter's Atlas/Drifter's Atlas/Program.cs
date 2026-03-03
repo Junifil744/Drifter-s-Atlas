@@ -98,16 +98,13 @@ namespace Drifters_Atlas {
             Texture2D roomOverlayOn = Raylib.LoadTexture("Resources/mapControls/roomOverlayOn.png");
             Texture2D roomOverlayOff = Raylib.LoadTexture("Resources/mapControls/roomOverlayOff.png");
             Texture2D moduleMarkerUG = Raylib.LoadTexture("Resources/mapControls/moduleMarkerUg.png");
-            Texture2D moduleMarkerAny = Raylib.LoadTexture("Resources/mapControls/moduleMarkerAny.png");
-            Texture2D moduleVisOn = Raylib.LoadTexture("Resources/mapControls/moduleVisOn.png");
+            Texture2D moduleAny = Raylib.LoadTexture("Resources/mapControls/moduleAny.png");
             Texture2D moduleVisOff = Raylib.LoadTexture("Resources/mapControls/moduleVisOff.png");
             Texture2D monolithMarkerUG = Raylib.LoadTexture("Resources/mapControls/monolithMarkerUg.png");
-            Texture2D monolithMarkerAny = Raylib.LoadTexture("Resources/mapControls/monolithMarkerAny.png");
-            Texture2D monolithVisOn = Raylib.LoadTexture("Resources/mapControls/monolithVisOn.png");
+            Texture2D monolithAny = Raylib.LoadTexture("Resources/mapControls/monolithAny.png");
             Texture2D monolithVisOff = Raylib.LoadTexture("Resources/mapControls/monolithVisOff.png");
             Texture2D gunMarkerUG = Raylib.LoadTexture("Resources/mapControls/gunMarkerUg.png");
-            Texture2D gunMarkerAny = Raylib.LoadTexture("Resources/mapControls/gunMarkerAny.png");
-            Texture2D gunVisOn = Raylib.LoadTexture("Resources/mapControls/gunVisOn.png");
+            Texture2D gunAny = Raylib.LoadTexture("Resources/mapControls/gunAny.png");
             Texture2D gunVisOff = Raylib.LoadTexture("Resources/mapControls/gunVisOff.png");
             
             Texture2D mapUgOff = Raylib.LoadTexture("Resources/mapControls/spr_MapLabIcon_0.png");
@@ -296,12 +293,12 @@ namespace Drifters_Atlas {
             Menu mapMenu = new Menu("Map", Menu.MenuType.Map, mapMenuRect, 30);
             Button ugToggleButton = new Button(0, mapUgOff, mapUgOn, ref mapMenu, mapButtonClick, false);
             Button roomOverlayButton = new Button(1, roomOverlayOff, roomOverlayOn, ref mapMenu, mapButtonClick, false);
-            Button moduleVisibilityButton = new Button(2, moduleMarkerAny, moduleMarkerUG, ref mapMenu, mapButtonClick, true, "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
-            Button moduleToggleButton = new Button(3, moduleVisOn, moduleVisOff, ref mapMenu, mapButtonClick, false, "Modules are hidden", "Modules are shown");
-            Button monolithVisibilityButton = new Button(4, monolithMarkerAny, monolithMarkerUG, ref mapMenu, mapButtonClick, true, "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
-            Button monolithToggleButton = new Button(5, monolithVisOn, monolithVisOff, ref mapMenu, mapButtonClick, false, "Monoliths are hidden", "Monoliths are shown");
-            Button gunVisibilityButton = new Button(6, gunMarkerAny, gunMarkerUG, ref mapMenu, mapButtonClick, false, "Guns can only be seen in their respective layer (above/underground)", "Guns can be seen in both layers");
-            Button gunToggleButton = new Button(7, gunVisOn, gunVisOff, ref mapMenu, mapButtonClick, false, "Guns are hidden", "Guns are shown");
+            Button moduleVisibilityButton = new Button(2, moduleAny, moduleMarkerUG, ref mapMenu, mapButtonClick, true, "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
+            Button moduleToggleButton = new Button(3, moduleAny, moduleVisOff, ref mapMenu, mapButtonClick, false, "Modules are hidden", "Modules are shown");
+            Button monolithVisibilityButton = new Button(4, monolithAny, monolithMarkerUG, ref mapMenu, mapButtonClick, true, "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
+            Button monolithToggleButton = new Button(5, monolithAny, monolithVisOff, ref mapMenu, mapButtonClick, false, "Monoliths are hidden", "Monoliths are shown");
+            Button gunVisibilityButton = new Button(6, gunAny, gunMarkerUG, ref mapMenu, mapButtonClick, false, "Guns can only be seen in their respective layer (above/underground)", "Guns can be seen in both layers");
+            Button gunToggleButton = new Button(7, gunAny, gunVisOff, ref mapMenu, mapButtonClick, false, "Guns are hidden", "Guns are shown");
 
             #endregion
 

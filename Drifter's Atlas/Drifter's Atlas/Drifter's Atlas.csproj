@@ -10,7 +10,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
 	 <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <Deterministic>false</Deterministic>
-	  <AssemblyVersion>0.2.*</AssemblyVersion>
+	  <AssemblyVersion>0.3.*</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
