@@ -10,7 +10,7 @@ namespace Drifters_Atlas {
         [STAThread]
         public static unsafe void Main() {
             // Setup Window
-            // Raylib.SetConfigFlags(ConfigFlags.ResizableWindow); // Later, for Alpha uhhhhh... (looks up QoL update) Beta 1.0!
+            Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
             Raylib.InitWindow(800, 480, "Drifter's Atlas");
             Raylib.SetWindowSize(
                 (int)(Raylib.GetMonitorWidth(Raylib.GetCurrentMonitor()) * 0.7),
@@ -30,7 +30,7 @@ namespace Drifters_Atlas {
 
             int fontSize = 25;
             if(Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) < 1080) fontSize = 20; // shit fix. TODO: fix this better.
-            // Will likely go when i figure out how to properly handle window resizing. - Ash
+            // Will likely go when I figure out how to properly handle window resizing. - Ash
             
             // Map Values
             string saveData = string.Empty;
@@ -40,13 +40,6 @@ namespace Drifters_Atlas {
             bool underground = false;
             bool lastFrameUGSw = false;
             bool lastFrameInteracted = false;
-
-            // Map Menu Values
-            Rectangle mapMenuRect = new Rectangle(
-                new Vector2(10, windowHeight - (windowHeight / 10) - 10),
-                new Vector2(windowWidth - 20, windowHeight / 10)
-            );
-            // bool hideMenu = false;
 
             // Menu Values
             int imgBrightness = 0;
@@ -68,7 +61,13 @@ namespace Drifters_Atlas {
             Texture2D menuBgTexture = Raylib.LoadTextureFromImage(bgImg);
             float menuBgScale = 0;
             Texture2D menuBoxTexture = Raylib.LoadTexture("Resources/spr_MEN_Frame_Reg.png");
-
+            
+            // Map Menu Values
+            Rectangle mapMenuRect = new Rectangle(
+                new Vector2(10, windowHeight - (windowHeight / 10) - 10),
+                new Vector2(windowWidth - 20, windowHeight / 10)
+            );
+            
             float menuBoxScale = MathF.Min(
                 windowWidth / menuBoxTexture.Width / 1.2f,
                 windowHeight / menuBoxTexture.Height / 1.2f
@@ -305,10 +304,21 @@ namespace Drifters_Atlas {
             // Run the program
             while (!Raylib.WindowShouldClose()) {
                 #region Updating Values
-                Vector2 menuBoxPos = new Vector2(
-                    Raylib.GetScreenWidth() / 2 - menuBoxTexture.Width/ 2,
-                    Raylib.GetScreenHeight() / 2 - menuBoxTexture.Height/ 2
+                windowWidth = Raylib.GetScreenWidth();
+                windowHeight = Raylib.GetScreenHeight();
+                
+                menuBoxScale = MathF.Min(
+                    windowWidth / menuBoxTexture.Width / 1.2f,
+                    windowHeight / menuBoxTexture.Height / 1.2f
                 );
+
+                menuRect = new Rectangle(
+                    windowWidth / 2 - menuBoxTexture.Width * menuBoxScale / 2,
+                    windowHeight / 2 - menuBoxTexture.Height * menuBoxScale / 2,
+                    menuBoxTexture.Width * menuBoxScale,
+                    menuBoxTexture.Height * menuBoxScale
+                );
+                
                 if (currentMenu != 6) {
                     float scaleX = (float)windowWidth / menuBgTexture.Width;
                     float scaleY = (float)windowHeight / menuBgTexture.Height;
@@ -332,9 +342,9 @@ namespace Drifters_Atlas {
                 }
                 // Update menus
                 // Main Menu
-                if (currentMenu == 0) {
-                    foreach (Button button in mainMenu.buttonList) button.Update(); // Avoids updating the menu, we just need to update the buttons.
-                                                                                    // ...Until we allow rescaling! -Ash
+                if (currentMenu == 0)
+                {
+                    mainMenu.Update(menuRect);
                 }
                 // Load Save
                 else if (currentMenu == 1) {
@@ -348,8 +358,8 @@ namespace Drifters_Atlas {
                     if ((string)parseSave(1, "gameName") != "invalid") getSaveInfo(ref save1Button);
                     if ((string)parseSave(2, "gameName") != "invalid") getSaveInfo(ref save2Button);
                     if ((string)parseSave(3, "gameName") != "invalid") getSaveInfo(ref save3Button);
-                    foreach (Button button in loadMenu.buttonList) button.Update();
                     backButton.Update();
+                    loadMenu.Update(menuRect);
                 }
                 // Information
                 else if (currentMenu == 2) {
@@ -360,6 +370,7 @@ namespace Drifters_Atlas {
                         menuRect.Height / 10
                     );
                     backButton.Update();
+                    helpMenu.Update(menuRect);
                 }
                 // Credits
                 else if (currentMenu == 3) {
@@ -370,6 +381,7 @@ namespace Drifters_Atlas {
                         menuRect.Height / 10
                     );
                     backButton.Update();
+                    creditsMenu.Update(menuRect);
                 }
                 // The map.. Dear lord...
                 else if (currentMenu == 6) {
@@ -430,6 +442,7 @@ namespace Drifters_Atlas {
                         underground = !underground;
                         lastFrameUGSw = true;
                         ugToggleButton.state = Convert.ToByte(underground); // TODO: DOES THIS ACTUALLY WORK??????????????
+                                                                            // EDIT: YES IT DOES!!!!!!! - Ash
                         Raylib.PlaySound(menuOpenSfx);
                     }
                     if (Raylib.IsKeyUp(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) {
@@ -499,6 +512,7 @@ namespace Drifters_Atlas {
                         menuRect.Height / 10
                     );
                     foreach (Button button in pauseMenu.buttonList) button.Update();
+                    pauseMenu.Update(menuRect);
                     backButton.Update();
                 }
 
@@ -506,7 +520,7 @@ namespace Drifters_Atlas {
                 if (Raylib.IsFileDropped() && currentMenu != 6) {
                     var files = Raylib.LoadDroppedFiles();
                     try {
-                        saveData = Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(Marshal.PtrToStringAnsi((IntPtr)files.Paths[0]) ?? "Invalid"))).Substring(54);
+                        saveData = Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(Marshal.PtrToStringAnsi((IntPtr)files.Paths[0]) ?? "Invalid").Substring(80)));
                         Raylib.UnloadDroppedFiles(files);
                         loadSave(save0Button, 10);
                     } catch {
@@ -524,7 +538,7 @@ namespace Drifters_Atlas {
                 // Draw the background if the map isn't meant to be drawn
                 if (currentMenu != 7 && currentMenu != 6) {
                     Raylib.DrawTextureEx(menuBgTexture, bgPos, 0, menuBgScale, new Color(Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255), Math.Min(220 - imgBrightness / 2, 255)));
-                    Raylib.DrawTextEx(menuFont, v, new Vector2(windowWidth - Raylib.MeasureTextEx(menuFont, v, fontSize, -2).X, menuBgTexture.Height * menuBgScale - fontSize), fontSize, -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, v, new Vector2(windowWidth - Raylib.MeasureTextEx(menuFont, v, fontSize, -2).X, windowHeight - fontSize), fontSize, -2, Color.White);
                 }
                 if (currentMenu == 0) {
                     mainMenu.Draw();
@@ -672,6 +686,9 @@ namespace Drifters_Atlas {
                             break;
                         case 3:
                             save = JObject.Parse(save3);
+                            break;
+                        case 10:
+                            save = JObject.Parse(saveData);
                             break;
                     }
 
@@ -928,11 +945,10 @@ namespace Drifters_Atlas {
             Gun = 8,
             ColorSet = 9,
             Warp = 10,
-            Tower = 11,
 
-            AbyssCenter = 12,
-            AbyssModule = 13,
-            AbyssPillar = 14
+            AbyssCenter = 11,
+            AbyssModule = 12,
+            AbyssPillar = 13
         }
         public Rectangle rect;
         public SpriteType type;
@@ -1039,9 +1055,6 @@ namespace Drifters_Atlas {
         public void Update(Rectangle newRect) {
             rect = newRect;
             foreach (var button in buttonList) {
-                if(button.type != ButtonType.Map) {
-                    
-                }
                 button.Update();
             }
         }
