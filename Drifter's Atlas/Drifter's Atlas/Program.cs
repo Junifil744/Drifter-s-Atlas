@@ -21,8 +21,8 @@ namespace Drifters_Atlas {
             Raylib.SetExitKey(0);
             // TODO Clean this area
             // Setup Variables
-            // string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.1".ToString();
-            string v = "Alpha 0.2.9399";
+            string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.2".ToString();
+            // string v = "Alpha 0.2.9399";
             bool debug = true;
             int currentMenu = 0;
             int windowWidth = Raylib.GetScreenWidth();
@@ -30,7 +30,8 @@ namespace Drifters_Atlas {
 
             int fontSize = 25;
             if(Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) < 1080) fontSize = 20; // shit fix. TODO: fix this better.
-
+            // Will likely go when i figure out how to properly handle window resizing. - Ash
+            
             // Map Values
             string saveData = string.Empty;
             Vector2 drawPos = new Vector2(0, 0);
@@ -124,6 +125,11 @@ namespace Drifters_Atlas {
             Texture2D mapBossActive = Raylib.LoadTexture("Resources/spr_MapTowerLock_1.png");
             Image mapPistol = Raylib.LoadImage("Resources/spr_Pistol.png");
             Image mapZeliska = Raylib.LoadImage("Resources/spr_Zeliska.png");
+            Image mapRailgun = Raylib.LoadImage("Resources/spr_Railgun.png");
+            Image mapBlunderbuss = Raylib.LoadImage("Resources/spr_Blunderbuss.png");
+            Image mapDiamShotgun = Raylib.LoadImage("Resources/spr_diamShotgun.png");
+            Image mapImpactRailgun = Raylib.LoadImage("Resources/spr_impactRailgun.png"); // TODO, goddamnit get your naming conventions right
+            
             // Controls
             List<MapSprite> spriteList = new List<MapSprite>();
             // spriteList.Add(new MapSprite(mapDrifter, MapSprite.SpriteType.AbyssCenter, new Vector2(10, 0), mapADrifter)); // FOR A LATER UPDATE.
@@ -226,8 +232,13 @@ namespace Drifters_Atlas {
             spriteList.Add(new MapSprite(mapBoss, MapSprite.SpriteType.Boss, new Vector2(33, 324), false, mapBossActive, 3, "noUG"));
 
             // Guns
-            spriteList.Add(new MapSprite(mapPistol, MapSprite.SpriteType.Gun, new Vector2(-145.5f, -126), true, 1));
-            spriteList.Add(new MapSprite(mapZeliska, MapSprite.SpriteType.Gun, new Vector2(-688, -87.5f), false, 5));
+            spriteList.Add(new MapSprite(mapPistol, MapSprite.SpriteType.Gun, new Vector2(-145.5f, -126), true, 1)); // Pistol
+            spriteList.Add(new MapSprite(mapZeliska, MapSprite.SpriteType.Gun, new Vector2(-688, -87.5f), false, 2)); // Zeliska
+            spriteList.Add(new MapSprite(mapRailgun, MapSprite.SpriteType.Gun, new Vector2(8.5f, -500), true, 21)); // Railgun
+            spriteList.Add(new MapSprite(mapBlunderbuss, MapSprite.SpriteType.Gun, new Vector2(640, -133.5f), true, 43)); // Blunderbuss
+            spriteList.Add(new MapSprite(mapDiamShotgun, MapSprite.SpriteType.Gun, new Vector2(388.5f, -185), true, 41)); // Diamond Shotgun
+            spriteList.Add(new MapSprite(mapImpactRailgun, MapSprite.SpriteType.Gun, new Vector2(99.5f, 218.5f), true, 23)); // Impact Railgun
+            
             #endregion
 
             // Load font
@@ -445,7 +456,6 @@ namespace Drifters_Atlas {
                                 sprite.collected = parseModule(currentSave, i, sprite.ID);
                                 if (sprite.collected) break;
                             }
-                            
                         } else if (sprite.type == MapSprite.SpriteType.AbyssPillar || sprite.type == MapSprite.SpriteType.Boss) { // Pillar && Boss collected
                             sprite.collected = ((string)parseSave(currentSave, "well")).Contains(sprite.ID.ToString());
                         } else if (sprite.type == MapSprite.SpriteType.AbyssCenter) {
@@ -460,7 +470,10 @@ namespace Drifters_Atlas {
                                 }
                                 if (sprite.collected) break;
                             }
+                        } else if (sprite.type == MapSprite.SpriteType.Gun) {
+                            sprite.collected = ((string)parseSave(currentSave, "sc")).Contains(sprite.ID.ToString());
                         }
+
                         sprite.scale = zoom;
                         sprite.parentObject = new Rectangle(drawPos, new Vector2(mapTex.Width * zoom, mapTex.Height * zoom));
                         sprite.Update();
@@ -685,8 +698,8 @@ namespace Drifters_Atlas {
             }
             string SafeReadFile(string path) {
                 try {
-                    return Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(path))).Substring(54);
-                } catch {
+                    return Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(path).Substring(80)));
+                } catch(Exception err) {
                     return string.Empty;
                 }
             }
