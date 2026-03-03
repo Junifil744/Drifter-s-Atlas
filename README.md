@@ -38,7 +38,7 @@ You can contact me at:<br>
 - [X] Adding a few more collectible types (gun, bosses)
 - [ ] Polishing animations and design
 - [ ] Automatic menu text wrap
-- [ ] Properly managing every possible screen sizes.
+- [X] Properly managing every possible screen sizes.
 
 ### Alpha 0.4 (Collectibles Update)
 - [ ] All collectible types added.

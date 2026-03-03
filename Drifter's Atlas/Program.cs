@@ -500,8 +500,13 @@ namespace Drifters_Atlas {
                         sprite.Update();
                     }
 
-                    // Update Buttons
-                    foreach (Button button in mapMenu.buttonList) button.Update();
+                    // Update Menu
+                    // Map Menu Values
+                    mapMenuRect = new Rectangle(
+                        new Vector2(10, windowHeight - (windowHeight / 10) - 10),
+                        new Vector2(windowWidth - 20, windowHeight / 10)
+                    );
+                    mapMenu.Update(mapMenuRect);
                 }
                 else if (currentMenu == 7) {
                     // menuName = "Settings";
@@ -557,7 +562,7 @@ namespace Drifters_Atlas {
                 }
                 else if (currentMenu == 3) {
                     creditsMenu.Draw();
-                    Raylib.DrawTextEx(menuFont, "Credits!\n\nJunifil: Coding the whole thing and\n     putting everything together.\nTK: Moral support dawg.", new Vector2(menuRect.X + (20*menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize, -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, "Credits!\n\nJunifil: Coding the whole thing and\n     putting everything together.\n\nMy love: For being there for me\n\nTK: Moral support dawg.", new Vector2(menuRect.X + (20*menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize, -2, Color.White);
                 }
                 else if (currentMenu == 6) {
                     drawMap();
@@ -579,7 +584,7 @@ namespace Drifters_Atlas {
                     backButton.Draw();
                 }
                 Vector2 mouseMap = (Raylib.GetMousePosition() - windowCenter) / zoom - mapPos - new Vector2(mapTex.Width / 2, mapTex.Height / 2);
-                if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nScale: {mapTex.Width * zoom},{mapTex.Height * zoom}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\n{backButton.ID}", 0, 0, 20, Color.Pink);
+                if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\n{backButton.ID}\n\nMenuRect\n{menuRect}\n{mainMenu.menuBoxScale}", 0, 0, 20, Color.Pink);
                 Raylib.EndDrawing();
                 #endregion
             }
@@ -1019,7 +1024,7 @@ namespace Drifters_Atlas {
         public MenuType type;
         public ushort indexMax;
 
-        private float menuBoxScale;
+        public float menuBoxScale;
         private Font menuFont = Raylib.LoadFont("Resources/Imagine.ttf");
         private int windowWidth = Raylib.GetScreenWidth();
         private int windowHeight = Raylib.GetScreenHeight();
@@ -1047,13 +1052,19 @@ namespace Drifters_Atlas {
                 windowWidth / this.image.Width / 1.2f,
                 windowHeight / this.image.Height / 1.2f
             );
-
-            textX = windowWidth / 2 - (int)(this.rect.Width / 2) + (int)(12 * menuBoxScale);
-            textY = windowHeight / 2 - (int)(this.rect.Height / 2) - (int)(8 * menuBoxScale);
         }
 
         public void Update(Rectangle newRect) {
+            windowWidth = Raylib.GetScreenWidth();
+            windowHeight = Raylib.GetScreenHeight();
+            menuBoxScale = MathF.Min(
+                windowWidth / image.Width / 1.2f,
+                windowHeight / image.Height / 1.2f
+            );
             rect = newRect;
+            textX = (int)rect.X + (int)(12 * menuBoxScale);
+            textY = (int)rect.Y - 20;
+            
             foreach (var button in buttonList) {
                 button.Update();
             }
