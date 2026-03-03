@@ -8,7 +8,7 @@ using static Drifters_Atlas.Button;
 namespace Drifters_Atlas {
     class Program {
         [STAThread]
-        public unsafe static void Main() {
+        public static unsafe void Main() {
             // Setup Window
             // Raylib.SetConfigFlags(ConfigFlags.ResizableWindow); // Later, for Alpha uhhhhh... (looks up QoL update) Beta 1.0!
             Raylib.InitWindow(800, 480, "Drifter's Atlas");
@@ -291,14 +291,14 @@ namespace Drifters_Atlas {
 
             // Map Menu Buttons
             Menu mapMenu = new Menu("Map", Menu.MenuType.Map, mapMenuRect, 30);
-            Button ugToggleButton = new Button(0, mapUgOff, mapUgOn, ref mapMenu, mapButtonClick, false);
-            Button roomOverlayButton = new Button(1, roomOverlayOff, roomOverlayOn, ref mapMenu, mapButtonClick, false);
-            Button moduleVisibilityButton = new Button(2, moduleAny, moduleMarkerUG, ref mapMenu, mapButtonClick, true, "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
-            Button moduleToggleButton = new Button(3, moduleAny, moduleVisOff, ref mapMenu, mapButtonClick, false, "Modules are hidden", "Modules are shown");
-            Button monolithVisibilityButton = new Button(4, monolithAny, monolithMarkerUG, ref mapMenu, mapButtonClick, true, "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
-            Button monolithToggleButton = new Button(5, monolithAny, monolithVisOff, ref mapMenu, mapButtonClick, false, "Monoliths are hidden", "Monoliths are shown");
-            Button gunVisibilityButton = new Button(6, gunAny, gunMarkerUG, ref mapMenu, mapButtonClick, false, "Guns can only be seen in their respective layer (above/underground)", "Guns can be seen in both layers");
-            Button gunToggleButton = new Button(7, gunAny, gunVisOff, ref mapMenu, mapButtonClick, false, "Guns are hidden", "Guns are shown");
+            Button ugToggleButton = new Button(0, mapUgOff, mapUgOn, ref mapMenu, mapButtonClick, 0);
+            Button roomOverlayButton = new Button(1, roomOverlayOff, roomOverlayOn, ref mapMenu, mapButtonClick, 0);
+            Button moduleVisibilityButton = new Button(2, moduleVisOff, moduleMarkerUG, ref mapMenu, mapButtonClick, 1, "Modules are hidden", "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
+            moduleVisibilityButton.terImage = moduleAny;
+            Button monolithVisibilityButton = new Button(3, monolithVisOff, monolithMarkerUG, ref mapMenu, mapButtonClick, 1, "Monoliths are hidden", "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
+            monolithVisibilityButton.terImage = monolithAny;
+            Button gunVisibilityButton = new Button(4, gunVisOff, gunMarkerUG, ref mapMenu, mapButtonClick, 2, "Guns are hidden", "Guns can only be seen in their respective layer (above/underground)", "Guns can be seen in both layers");
+            gunVisibilityButton.terImage = gunAny;
 
             #endregion
 
@@ -429,7 +429,7 @@ namespace Drifters_Atlas {
                     if ((Raylib.IsKeyDown(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) && lastFrameUGSw == false) {
                         underground = !underground;
                         lastFrameUGSw = true;
-                        ugToggleButton.enabled = underground;
+                        ugToggleButton.state = Convert.ToByte(underground); // TODO: DOES THIS ACTUALLY WORK??????????????
                         Raylib.PlaySound(menuOpenSfx);
                     }
                     if (Raylib.IsKeyUp(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) {
@@ -565,7 +565,7 @@ namespace Drifters_Atlas {
                     backButton.Draw();
                 }
                 Vector2 mouseMap = (Raylib.GetMousePosition() - windowCenter) / zoom - mapPos - new Vector2(mapTex.Width / 2, mapTex.Height / 2);
-                if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nScale: {mapTex.Width * zoom},{mapTex.Height * zoom}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\n{backButton.ID}\n\n{roomOverlayButton.enabled}\n", 0, 0, 20, Color.Pink);
+                if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nScale: {mapTex.Width * zoom},{mapTex.Height * zoom}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\n{backButton.ID}", 0, 0, 20, Color.Pink);
                 Raylib.EndDrawing();
                 #endregion
             }
@@ -634,21 +634,23 @@ namespace Drifters_Atlas {
             void mapButtonClick(Button sender, int ID)
             {
                 if (ID == 0) underground = !underground;
-                sender.enabled = !sender.enabled;
+                if(ID >= 2 && sender.state == 2) sender.state = 0;
+                else if (ID < 2 && sender.state == 1) sender.state = 0;
+                else sender.state++;
             }
             // Helper functions
             void drawMap() {
                 Raylib.ClearBackground(Color.Black);
                 Raylib.DrawTextureEx(mapDrawTex, drawPos, 0, zoom, Color.White);
-                if(roomOverlayButton.enabled && !underground) Raylib.DrawTextureEx(mapRoomOverlayTex, drawPos, 0, zoom, Color.White);
+                if(roomOverlayButton.state == 1 && !underground) Raylib.DrawTextureEx(mapRoomOverlayTex, drawPos, 0, zoom, Color.White);
                 foreach (MapSprite sprite in spriteList) {
-                    if (sprite.type == MapSprite.SpriteType.Module && moduleToggleButton.enabled) continue;
-                    else if (sprite.type == MapSprite.SpriteType.Monolith && monolithToggleButton.enabled) continue;
-                    else if (sprite.type == MapSprite.SpriteType.Gun && gunToggleButton.enabled) continue;
+                    if (sprite.type == MapSprite.SpriteType.Module && moduleVisibilityButton.state == 0) continue;
+                    else if (sprite.type == MapSprite.SpriteType.Monolith && monolithVisibilityButton.state == 0) continue;
+                    else if (sprite.type == MapSprite.SpriteType.Gun && gunVisibilityButton.state == 0) continue;
                     if (underground == sprite.underground || sprite.tag.Contains("noUG")
-                        || (!moduleVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Module)
-                        || (!monolithVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Monolith)
-                        || (!gunVisibilityButton.enabled && sprite.type == MapSprite.SpriteType.Gun)
+                        || (moduleVisibilityButton.state == 1 && sprite.type == MapSprite.SpriteType.Module)
+                        || (monolithVisibilityButton.state == 2 && sprite.type == MapSprite.SpriteType.Monolith)
+                        || (gunVisibilityButton.state == 2 && sprite.type == MapSprite.SpriteType.Gun)
                     ) {
                         sprite.Draw();
                         if (debug) Raylib.DrawRectangleLinesEx(sprite.rect, 2 * (zoom / 10), Color.Purple);
@@ -754,9 +756,10 @@ namespace Drifters_Atlas {
         // public Texture2D ghostImage;
         public Texture2D image;
         public Texture2D altImage;
+        public Texture2D terImage;
         public event buttonClick onClick;
         public Menu parentMenu;
-        public bool enabled = false;
+        public byte state = 0;
 
         private Sound hoverSfx = Raylib.LoadSound("Resources/snd_MenuMove.wav");
         private Vector2 textPos = Vector2.Zero;
@@ -769,7 +772,9 @@ namespace Drifters_Atlas {
         private int fontSize = 25;
         private string enabledToolTip = string.Empty;
         private string disabledToolTip = string.Empty;
-
+        public string tertiaryToolTip = string.Empty;
+        
+        
         public Button(string text, int ID, ButtonType type, Texture2D? image, Menu? parentMenu = null, buttonClick onClick = null, Texture2D? altImage = null) {
             this.ID = ID;
             this.text = text;
@@ -787,16 +792,17 @@ namespace Drifters_Atlas {
             }
         }
 
-        public Button(int ID, Texture2D disabledImage, Texture2D enabledImage, ref Menu parentMenu, buttonClick onClick, bool? enabled = null, string? enabledToolTip = null, string? disabledToolTip = null) {
+        public Button(int ID, Texture2D disabledImage, Texture2D enabledImage, ref Menu parentMenu, buttonClick onClick, byte? state = null, string? disabledToolTip = null, string? enabledToolTip = null, string? tertiaryToolTip = null) {
             this.ID = ID;
             image = disabledImage;
             altImage = enabledImage;
             this.parentMenu = parentMenu;
             parentMenu.buttonList.Add(this);
             this.onClick = onClick;
-            this.enabled = enabled ?? false;
+            this.state = state ?? 0;
             this.enabledToolTip = enabledToolTip ?? string.Empty;
             this.disabledToolTip = disabledToolTip ?? string.Empty;
+            this.tertiaryToolTip = tertiaryToolTip ?? string.Empty;
             type = ButtonType.Map;
             Raylib.SetTextureFilter(menuFont.Texture, TextureFilter.Point);
         }
@@ -816,7 +822,8 @@ namespace Drifters_Atlas {
                     parentMenu.rect.Height - 8,
                     parentMenu.rect.Height - 8
                 );
-                if (enabled) text = enabledToolTip;
+                if (state == 2) text = tertiaryToolTip;
+                else if (state == 1) text = enabledToolTip;
                 else text = disabledToolTip;
                 namePos = Raylib.MeasureTextEx(menuFont, text, fontSize / 2, -2f);
                 textPos = new Vector2(Raylib.GetMousePosition().X + 30, Raylib.GetMousePosition().Y - namePos.Y/2);
@@ -894,7 +901,8 @@ namespace Drifters_Atlas {
                 Color tint = new Color(200, 200, 200);
                 if (!hovering) tint = Color.White;
 
-                if (enabled) Raylib.DrawTextureEx(altImage, new Vector2(rect.X, rect.Y), 0, scale, tint);
+                if (state == 1) Raylib.DrawTextureEx(altImage, new Vector2(rect.X, rect.Y), 0, scale, tint);
+                else if (state == 2) Raylib.DrawTextureEx(terImage, new Vector2(rect.X, rect.Y), 0, scale, tint);
                 else Raylib.DrawTextureEx(image, new Vector2(rect.X, rect.Y), 0, scale, tint);
             }
         }
