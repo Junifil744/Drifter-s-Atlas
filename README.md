@@ -33,7 +33,8 @@ You can contact me at:<br>
 - [x] Button tooltips.
 
 ### Alpha 0.3 (Polishing Update)
-- [ ] Updating the buttons' look to be cleaner
+- [X] Updating the buttons' look to be cleaner
+- [ ] Making the buttons have 3 states (1 button instead of 2 for each collectible)
 - [X] Adding a few more collectible types (gun, bosses)
 - [ ] Polishing animations and design
 - [ ] Automatic menu text wrap
