@@ -36,7 +36,7 @@ You can contact me at:<br>
 - [X] Updating the buttons' look to be cleaner
 - [X] Making the buttons have 3 states (1 button instead of 2 for each collectible)
 - [X] Adding a few more collectible types (gun, bosses)
-- [ ] Polishing animations and design
+- [X] Polishing animations and design
 - [X] Automatic menu text wrap [WONT BE NEEDED! Just rescale the font right lol]
 - [X] Properly managing every possible screen sizes.
 

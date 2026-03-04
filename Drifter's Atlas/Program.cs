@@ -22,9 +22,9 @@ namespace Drifters_Atlas {
             Raylib.SetExitKey(0);
             // TODO Clean this area
             // Setup Variables
-            string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.2".ToString();
-            // string v = "Alpha 0.2.9399";
-            bool debug = true;
+            // string v = "Indev: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version ?? "Alpha 0.3".ToString();
+            string v = "Alpha 0.3.9558";
+            bool debug = false;
             int currentMenu = 0;
             int windowWidth = Raylib.GetScreenWidth();
             int windowHeight = Raylib.GetScreenHeight();
@@ -46,7 +46,7 @@ namespace Drifters_Atlas {
             int imgBrightness = 0;
             bool brightnessIncreasing = true;
             Vector2 bgPos = new Vector2(0, 0);
-            Vector2 windowCenter = new Vector2(windowWidth / 2, windowHeight / 2);
+            Vector2 windowCenter = new Vector2(windowWidth / 2f, windowHeight / 2f);
             KeyboardKey lastKey = KeyboardKey.Null;
 
             // Load Saves
@@ -65,8 +65,8 @@ namespace Drifters_Atlas {
             
             // Map Menu Values
             Rectangle mapMenuRect = new Rectangle(
-                new Vector2(10, windowHeight - (windowHeight / 10) - 10),
-                new Vector2(windowWidth - 20, windowHeight / 10)
+                new Vector2(10, windowHeight - windowHeight / 10f - 10),
+                new Vector2(windowWidth - 20, windowHeight / 10f)
             );
             
             float menuBoxScale = MathF.Min(
@@ -75,8 +75,8 @@ namespace Drifters_Atlas {
             );
 
             Rectangle menuRect = new Rectangle(
-                windowWidth / 2 - menuBoxTexture.Width * menuBoxScale / 2,
-                windowHeight / 2 - menuBoxTexture.Height * menuBoxScale / 2,
+                windowWidth / 2f - menuBoxTexture.Width * menuBoxScale / 2,
+                windowHeight / 2f - menuBoxTexture.Height * menuBoxScale / 2,
                 menuBoxTexture.Width * menuBoxScale,
                 menuBoxTexture.Height * menuBoxScale
             );
@@ -86,7 +86,7 @@ namespace Drifters_Atlas {
             Texture2D mapLabTex = Raylib.LoadTexture("Resources/spr_Map_Lab_0.png");
             Texture2D mapRoomOverlayTex = Raylib.LoadTexture("Resources/spr_Map_roomOverlay.png");
             Texture2D mapDrawTex = mapTex;
-            Vector2 mapPos = new Vector2(-mapTex.Width / 2, -mapTex.Height / 2);
+            Vector2 mapPos = new Vector2(-mapTex.Width / 2f, -mapTex.Height / 2f);
 
             Texture2D sprDrifterTex = Raylib.LoadTexture("Resources/spr_charstandside.png");
             Texture2D sprADrifterTex = Raylib.LoadTexture("Resources/spr_ADStandSide.png");
@@ -290,7 +290,7 @@ namespace Drifters_Atlas {
             Menu creditsMenu = new Menu("Credits", Menu.MenuType.Menu, menuRect, 0, menuBoxTexture);
 
             // Others
-            Button backButton = new Button("Back", 99, ButtonType.Back, null, null, null);
+            Button backButton = new Button("Back", 99, ButtonType.Back, null, null);
             backButton.onClick += backButtonClick;
 
             // Settings Page(?) Pause Page?
@@ -301,12 +301,9 @@ namespace Drifters_Atlas {
             Menu mapMenu = new Menu("Map", Menu.MenuType.Map, mapMenuRect, 30);
             Button ugToggleButton = new Button(0, mapUgOff, mapUgOn, ref mapMenu, mapButtonClick, 0);
             Button roomOverlayButton = new Button(1, roomOverlayOff, roomOverlayOn, ref mapMenu, mapButtonClick, 0);
-            Button moduleVisibilityButton = new Button(2, moduleVisOff, moduleMarkerUG, ref mapMenu, mapButtonClick, 1, "Modules are hidden", "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers");
-            moduleVisibilityButton.terImage = moduleAny;
-            Button monolithVisibilityButton = new Button(3, monolithVisOff, monolithMarkerUG, ref mapMenu, mapButtonClick, 1, "Monoliths are hidden", "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers");
-            monolithVisibilityButton.terImage = monolithAny;
-            Button gunVisibilityButton = new Button(4, gunVisOff, gunMarkerUG, ref mapMenu, mapButtonClick, 2, "Guns are hidden", "Guns can only be seen in their respective layer (above/underground)", "Guns can be seen in both layers");
-            gunVisibilityButton.terImage = gunAny;
+            Button moduleVisibilityButton = new Button(2, moduleVisOff, moduleMarkerUG, ref mapMenu, mapButtonClick, 1, "Modules are hidden", "Modules can only be seen in their respective layer (above/underground)", "Modules can be seen in both layers") { terImage = moduleAny };
+            Button monolithVisibilityButton = new Button(3, monolithVisOff, monolithMarkerUG, ref mapMenu, mapButtonClick, 1, "Monoliths are hidden", "Monoliths can only be seen in their respective layer (above/underground)", "Monoliths can be seen in both layers") { terImage = monolithAny };
+            Button gunVisibilityButton = new Button(4, gunVisOff, gunMarkerUG, ref mapMenu, mapButtonClick, 2, "Guns are hidden", "Guns can only be seen in their respective layer (above/underground)", "Guns can be seen in both layers") { terImage = gunAny };
 
             #endregion
 
@@ -322,8 +319,8 @@ namespace Drifters_Atlas {
                 );
 
                 menuRect = new Rectangle(
-                    windowWidth / 2 - menuBoxTexture.Width * menuBoxScale / 2,
-                    windowHeight / 2 - menuBoxTexture.Height * menuBoxScale / 2,
+                    windowWidth / 2f - menuBoxTexture.Width * menuBoxScale / 2,
+                    windowHeight / 2f - menuBoxTexture.Height * menuBoxScale / 2,
                     menuBoxTexture.Width * menuBoxScale,
                     menuBoxTexture.Height * menuBoxScale
                 );
@@ -401,7 +398,7 @@ namespace Drifters_Atlas {
                     bool right = Raylib.IsKeyDown(KeyboardKey.D) || Raylib.IsKeyDown(KeyboardKey.Right);
                     bool zoomIn = Raylib.IsKeyDown(KeyboardKey.E) || Raylib.IsKeyDown(KeyboardKey.Kp1);
                     bool zoomOut = Raylib.IsKeyDown(KeyboardKey.Q) || Raylib.IsKeyDown(KeyboardKey.Kp2);
-                    debug = Raylib.IsKeyDown(KeyboardKey.F);
+                    // debug = Raylib.IsKeyDown(KeyboardKey.F);
 
                     if (Raylib.IsKeyDown(KeyboardKey.Escape)) {
                         currentMenu = 7;
@@ -413,14 +410,14 @@ namespace Drifters_Atlas {
                         lastFrameInteracted = true;
                         retTint = new Color(252, 45, 193);
                         bool valid = false;
-                        foreach (Button button in mapMenu.buttonList) {
-                            if (button.hovering) {
-                                valid = true;
-                                break;
-                            }
+                        foreach (Button button in mapMenu.buttonList)
+                        {
+                            if (!button.hovering) continue;
+                            valid = true;
+                            break;
                         }
-                        if(valid) Raylib.PlaySound(acceptSound);
-                        else Raylib.PlaySound(errorSound);
+
+                        Raylib.PlaySound(valid ? acceptSound : errorSound);
                     } else if (Raylib.IsMouseButtonUp(MouseButton.Left)) {
                         lastFrameInteracted = false;
                         retTint = Color.White;
@@ -471,8 +468,7 @@ namespace Drifters_Atlas {
                         windowCenter.Y + mapPos.Y * zoom
                     );
 
-                    if (underground) mapDrawTex = mapLabTex;
-                    else mapDrawTex = mapTex;
+                    mapDrawTex = underground ? mapLabTex : mapTex;
 
                     // Update sprites
                     animLoopCounter += 2;
@@ -574,8 +570,10 @@ namespace Drifters_Atlas {
                     Raylib.DrawTextEx(menuFont, "Credits!\n\nJunifil: Coding the whole thing and\n     putting everything together.\n\nMy love: For being there for me\n\nTK: Moral support dawg.", new Vector2(menuRect.X + (20*menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize * (menuBoxScale/2.5f), -2, Color.White);
                 }
                 else if (currentMenu == 6) {
+                    // Draw the map itself
                     drawMap();
 
+                    // Draw the map shine. // TODO: Move this to the updating area. Lots of calculations we shouldn't be doing here.
                     bool abyssOpen = true;
                     for (int i = 1; i < 5; i++) if (spriteList[i].collected == false) abyssOpen = false;
                     
@@ -593,9 +591,33 @@ namespace Drifters_Atlas {
                         new Color(255, 255, 255, 255 - animLoopCounter)
                     );
                     
+                    // Draw the map arrows
+                    Raylib.DrawTextureEx(mapArrowUp,
+                        new Vector2(windowWidth / 2f - mapArrowUp.Width * 2, // Center of screen for X
+                                    20), // Top of screen + 20px for Y
+                        0, 4, new Color(255, 255, 255, Math.Clamp(Math.Abs(128 - animLoopCounter) * 2, 63, 170))
+                    );
+                    Raylib.DrawTextureEx(mapArrowDown,
+                        new Vector2(windowWidth / 2f - mapArrowUp.Width * 2, // Center of screen for X
+                                    windowHeight - mapArrowUp.Height * 4 - 20), // Bottom of screen - 20px for Y
+                        0, 4, new Color(255, 255, 255, Math.Clamp(Math.Abs(128 - animLoopCounter) * 2, 63, 170))
+                    );
+                    Raylib.DrawTextureEx(mapArrowLeft,
+                        new Vector2(20, // 20 Left of the screen + 20px for X
+                            windowHeight / 2f - mapArrowUp.Height * 2), // Center of the screen for Y
+                        0, 4, new Color(255, 255, 255, Math.Clamp(Math.Abs(128 - animLoopCounter) * 2, 63, 170))
+                    );
+                    Raylib.DrawTextureEx(mapArrowRight,
+                        new Vector2(windowWidth - mapArrowUp.Width * 4 - 20, // Right of the screen - 20px for X
+                            windowHeight / 2f - mapArrowUp.Height * 2), // Center of the screen for Y
+                        0, 4, new Color(255, 255, 255, Math.Clamp(Math.Abs(128 - animLoopCounter) * 2, 63, 170))
+                    );
+                    
+                    // Draw the menu
                     mapMenu.Draw();
+                    // Draw the little tooltip for the buttons
                     foreach (Button button in mapMenu.buttonList) if(button.hovering) button.DrawToolTip();
-
+                    // Draw the mouse position
                     Raylib.DrawTextureEx(reticuleTex, new Vector2(Raylib.GetMousePosition().X - reticuleTex.Width * 1.5f, Raylib.GetMousePosition().Y - reticuleTex.Height * 1.5f), 0, 3f, retTint);
                 }
                 else if (currentMenu == 7) {
@@ -789,7 +811,7 @@ namespace Drifters_Atlas {
 
     unsafe class Button{
         public enum ButtonType : byte {
-            None = 0, // Never to be used. Wont load anything. Its just useful to define a variable to be none when initialized.
+            None = 0, // Never to be used. Won't load anything. It's just useful to define a variable to be none when initialized.
             Menu = 1, // Menu buttons
             SaveSelect = 2, // Selecting a save, this one has support for images and will need more than 1 label. Text content is not chooseable
             Map = 3, // Smaller square buttons for map functions.
