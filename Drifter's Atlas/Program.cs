@@ -12,6 +12,7 @@ namespace Drifters_Atlas {
             // Setup Window
             Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
             Raylib.InitWindow(800, 480, "Drifter's Atlas");
+            Raylib.SetWindowMinSize(490, 400);
             Raylib.SetWindowSize(
                 (int)(Raylib.GetMonitorWidth(Raylib.GetCurrentMonitor()) * 0.7),
                 (int)(Raylib.GetMonitorHeight(Raylib.GetCurrentMonitor()) * 0.7)
@@ -92,6 +93,14 @@ namespace Drifters_Atlas {
             Texture2D sprGhostTex = Raylib.LoadTexture("Resources/spr_ghost_0.png");
             Texture2D reticuleTex = Raylib.LoadTexture("Resources/spr_MapReticule_0.png");
             Color retTint = Color.White;
+            
+            // Animated images.
+            byte animLoopCounter = 0;
+            Texture2D mapShine = Raylib.LoadTexture("Resources/spr_MapShine.png");
+            Texture2D mapArrowUp = Raylib.LoadTexture("Resources/spr_MapArrows_0.png");
+            Texture2D mapArrowRight = Raylib.LoadTexture("Resources/spr_MapArrows_1.png");
+            Texture2D mapArrowDown = Raylib.LoadTexture("Resources/spr_MapArrows_2.png");
+            Texture2D mapArrowLeft = Raylib.LoadTexture("Resources/spr_MapArrows_3.png");
 
             // Map Menu related images.
             Texture2D roomOverlayOn = Raylib.LoadTexture("Resources/mapControls/roomOverlayOn.png");
@@ -390,10 +399,9 @@ namespace Drifters_Atlas {
                     bool down = Raylib.IsKeyDown(KeyboardKey.S) || Raylib.IsKeyDown(KeyboardKey.Down);
                     bool left = Raylib.IsKeyDown(KeyboardKey.A) || Raylib.IsKeyDown(KeyboardKey.Left);
                     bool right = Raylib.IsKeyDown(KeyboardKey.D) || Raylib.IsKeyDown(KeyboardKey.Right);
-                    bool zoomIn = Raylib.IsKeyDown(KeyboardKey.Q) || Raylib.IsKeyDown(KeyboardKey.Kp1);
-                    bool zoomOut = Raylib.IsKeyDown(KeyboardKey.E) || Raylib.IsKeyDown(KeyboardKey.Kp2);
-                    // hideMenu = Raylib.IsKeyDown(KeyboardKey.Tab);
-                    // debug = Raylib.IsKeyDown(KeyboardKey.F);
+                    bool zoomIn = Raylib.IsKeyDown(KeyboardKey.E) || Raylib.IsKeyDown(KeyboardKey.Kp1);
+                    bool zoomOut = Raylib.IsKeyDown(KeyboardKey.Q) || Raylib.IsKeyDown(KeyboardKey.Kp2);
+                    debug = Raylib.IsKeyDown(KeyboardKey.F);
 
                     if (Raylib.IsKeyDown(KeyboardKey.Escape)) {
                         currentMenu = 7;
@@ -467,6 +475,7 @@ namespace Drifters_Atlas {
                     else mapDrawTex = mapTex;
 
                     // Update sprites
+                    animLoopCounter += 2;
                     foreach (MapSprite sprite in spriteList) {
                         if (sprite.type == MapSprite.SpriteType.Warp) {
                             sprite.collected = ((string)parseSave(currentSave, "warp")).Contains(sprite.ID.ToString());
@@ -558,19 +567,35 @@ namespace Drifters_Atlas {
                 }
                 else if (currentMenu == 2) {
                     helpMenu.Draw();
-                    Raylib.DrawTextEx(menuFont, "Controls\nWASD/Arrow Keys = Move\nQ/Numpad1 = Zoom In\nE/Numpad2 = Zoom out\nR/Numpad3 = Go Underground\nESC = Show pause menu\n\nTHIS IS A VERY EARLY BUILD\nI'm open to any feedback\nYou can contact me at:\nMy Discord (Junifil)\nEmail (junifil@middlemouse.click)\n\nAlpha 0.2\nBuilt September 25 2025", new Vector2(menuRect.X + (20 * menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize, -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, "Controls\nWASD/Arrow Keys = Move\nE/Numpad1 = Zoom In\nQ/Numpad2 = Zoom out\nR/Numpad3 = Go Underground\nESC = Show pause menu\n\nTHIS IS A VERY EARLY BUILD\nI'm open to any feedback\nYou can contact me at:\nMy Discord (Junifil)\nEmail (junifil@middlemouse.click)\n\nAlpha 0.2\nBuilt September 25 2025", new Vector2(menuRect.X + (20 * menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize * (menuBoxScale/2.5f), -2, Color.White);
                 }
                 else if (currentMenu == 3) {
                     creditsMenu.Draw();
-                    Raylib.DrawTextEx(menuFont, "Credits!\n\nJunifil: Coding the whole thing and\n     putting everything together.\n\nMy love: For being there for me\n\nTK: Moral support dawg.", new Vector2(menuRect.X + (20*menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize, -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, "Credits!\n\nJunifil: Coding the whole thing and\n     putting everything together.\n\nMy love: For being there for me\n\nTK: Moral support dawg.", new Vector2(menuRect.X + (20*menuBoxScale), menuRect.Y + (10 * menuBoxScale)), fontSize * (menuBoxScale/2.5f), -2, Color.White);
                 }
                 else if (currentMenu == 6) {
                     drawMap();
-                    // if(!hideMenu) {
-                        mapMenu.Draw();
 
-                        foreach (Button button in mapMenu.buttonList) if(button.hovering) button.DrawToolTip();
-                    // }
+                    bool abyssOpen = true;
+                    for (int i = 1; i < 5; i++) if (spriteList[i].collected == false) abyssOpen = false;
+                    
+                    if(abyssOpen) Raylib.DrawTextureEx(
+                        mapShine, 
+                        new Vector2(
+                            spriteList[0].rect.X + spriteList[0].rect.Width/2 // Center it to the sprite
+                            - mapShine.Width * animLoopCounter/10f * zoom / 2f, // Add offset for the rescaling.
+                            
+                            spriteList[0].rect.Y + spriteList[0].rect.Height/2 // Same here.
+                            - mapShine.Height * animLoopCounter/10f * zoom / 2f
+                        ),
+                        0, 
+                        animLoopCounter/10f * zoom, 
+                        new Color(255, 255, 255, 255 - animLoopCounter)
+                    );
+                    
+                    mapMenu.Draw();
+                    foreach (Button button in mapMenu.buttonList) if(button.hovering) button.DrawToolTip();
+
                     Raylib.DrawTextureEx(reticuleTex, new Vector2(Raylib.GetMousePosition().X - reticuleTex.Width * 1.5f, Raylib.GetMousePosition().Y - reticuleTex.Height * 1.5f), 0, 3f, retTint);
                 }
                 else if (currentMenu == 7) {
@@ -584,7 +609,7 @@ namespace Drifters_Atlas {
                     backButton.Draw();
                 }
                 Vector2 mouseMap = (Raylib.GetMousePosition() - windowCenter) / zoom - mapPos - new Vector2(mapTex.Width / 2, mapTex.Height / 2);
-                if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\n{backButton.ID}\n\nMenuRect\n{menuRect}\n{mainMenu.menuBoxScale}", 0, 0, 20, Color.Pink);
+                if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\n{backButton.ID}\n\n{windowHeight},{windowWidth}", 0, 0, 20, Color.Pink);
                 Raylib.EndDrawing();
                 #endregion
             }
@@ -857,17 +882,17 @@ namespace Drifters_Atlas {
             if (type == ButtonType.SaveSelect) {
                 props = text.Split('\n');
                 namePos = new Vector2(
-                    rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[0], fontSize, -2f).X) / 2,
-                    rect.Y + fontSize
+                    rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[0], fontSize * (parentMenu.menuBoxScale/2.5f), -2f).X) / 2,
+                    rect.Y + fontSize * (parentMenu.menuBoxScale/2.5f)
                 );
                 if (text != "Empty") {
                     timePos = new Vector2(
-                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[1], fontSize, -2f).X) / 2,
-                        rect.Y + 60
+                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[1], fontSize * (parentMenu.menuBoxScale/2.5f), -2f).X) / 2,
+                        rect.Y + 60 * (parentMenu.menuBoxScale/2.5f)
                     );
                     textPos = new Vector2(
-                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[2], fontSize, -2f).X) / 2,
-                        rect.Y + 90
+                        rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[2], fontSize * (parentMenu.menuBoxScale/2.5f), -2f).X) / 2,
+                        rect.Y + 90 * (parentMenu.menuBoxScale/2.5f)
                     );
                     drifterPos = new Vector2(rect.X + rect.Width - image.Width * 3 - 30, rect.Y + rect.Height/2 - image.Height*3/2);
                 }
@@ -907,13 +932,13 @@ namespace Drifters_Atlas {
                     Raylib.DrawRectangle((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height, new Color(211, 6, 128, 130));
                 }
                 if(text != "Empty") {
-                    if(props == null) throw new NullReferenceException("Props was undefined. Have you forgotten to update the button?");
-                    Raylib.DrawTextEx(menuFont, props[0], new Vector2(namePos.X, namePos.Y), fontSize, -2, Color.White);
-                    Raylib.DrawTextEx(menuFont, props[1], new Vector2(timePos.X, timePos.Y), fontSize, -2, new Color(44, 197, 177));
-                    Raylib.DrawTextEx(menuFont, props[2], new Vector2(textPos.X, textPos.Y), fontSize, -2, new Color(190, 190, 190));
+                    if(props == null) throw new NullReferenceException("Props was undefined. Have you forgotten to update the button?"); // Yes. Yes I have. Several times. Thanks past me.
+                    Raylib.DrawTextEx(menuFont, props[0], new Vector2(namePos.X, namePos.Y), fontSize * (parentMenu.menuBoxScale/2.5f), -2, Color.White);
+                    Raylib.DrawTextEx(menuFont, props[1], new Vector2(timePos.X, timePos.Y), fontSize * (parentMenu.menuBoxScale/2.5f), -2, new Color(44, 197, 177));
+                    Raylib.DrawTextEx(menuFont, props[2], new Vector2(textPos.X, textPos.Y), fontSize * (parentMenu.menuBoxScale/2.5f), -2, new Color(190, 190, 190));
                     Raylib.DrawTextureEx(image, drifterPos, 0, 3f, Color.White);
                 } else {
-                    Raylib.DrawTextEx(menuFont, text, new Vector2(namePos.X, namePos.Y), fontSize, -2, new Color(252, 45, 193, 136));
+                    Raylib.DrawTextEx(menuFont, text, new Vector2(namePos.X, namePos.Y), fontSize * (parentMenu.menuBoxScale/2.5f), -2, new Color(252, 45, 193, 136));
                 }
             } else if (type == ButtonType.Map) {
                 float scale = Math.Min(

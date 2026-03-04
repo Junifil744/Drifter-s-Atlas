@@ -6,8 +6,8 @@ You can open it, itll automatically read the save files from your AppData folder
 Or, you could simply drag and drop your own file and it will read it just as fine.<br>
 Then the controls are as follows;
 - WASD/Arrow Keys to move
-- Q/Numpad1 = Zoom In
-- E/Numpad2 = Zoom out
+- E/Numpad1 = Zoom In
+- Q/Numpad2 = Zoom out
 - R/Numpad3 = Go Underground
 - ESC = Show pause menu
 
@@ -37,7 +37,7 @@ You can contact me at:<br>
 - [X] Making the buttons have 3 states (1 button instead of 2 for each collectible)
 - [X] Adding a few more collectible types (gun, bosses)
 - [ ] Polishing animations and design
-- [ ] Automatic menu text wrap
+- [X] Automatic menu text wrap [WONT BE NEEDED! Just rescale the font right lol]
 - [X] Properly managing every possible screen sizes.
 
 ### Alpha 0.4 (Collectibles Update)
