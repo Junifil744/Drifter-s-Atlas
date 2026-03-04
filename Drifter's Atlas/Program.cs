@@ -446,8 +446,7 @@ namespace Drifters_Atlas {
                     if ((Raylib.IsKeyDown(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) && lastFrameUGSw == false) {
                         underground = !underground;
                         lastFrameUGSw = true;
-                        ugToggleButton.state = Convert.ToByte(underground); // TODO: DOES THIS ACTUALLY WORK??????????????
-                                                                            // EDIT: YES IT DOES!!!!!!! - Ash
+                        ugToggleButton.state = Convert.ToByte(underground); 
                         Raylib.PlaySound(menuOpenSfx);
                     }
                     if (Raylib.IsKeyUp(KeyboardKey.R) || Raylib.IsKeyDown(KeyboardKey.Kp3)) {
@@ -463,6 +462,7 @@ namespace Drifters_Atlas {
                     } else {
                         if (moveIncrement < 5) moveIncrement += 0.2f;
                     }
+                    windowCenter = new Vector2(windowWidth / 2f, windowHeight / 2f);
                     drawPos = new Vector2(
                         windowCenter.X + mapPos.X * zoom,
                         windowCenter.Y + mapPos.Y * zoom
@@ -508,8 +508,8 @@ namespace Drifters_Atlas {
                     // Update Menu
                     // Map Menu Values
                     mapMenuRect = new Rectangle(
-                        new Vector2(10, windowHeight - (windowHeight / 10) - 10),
-                        new Vector2(windowWidth - 20, windowHeight / 10)
+                        new Vector2(10, windowHeight - (windowHeight / 10f) - 10),
+                        new Vector2(windowWidth - 20, windowHeight / 10f)
                     );
                     mapMenu.Update(mapMenuRect);
                 }
@@ -630,7 +630,7 @@ namespace Drifters_Atlas {
                     // Draw back button when necessary.
                     backButton.Draw();
                 }
-                Vector2 mouseMap = (Raylib.GetMousePosition() - windowCenter) / zoom - mapPos - new Vector2(mapTex.Width / 2, mapTex.Height / 2);
+                Vector2 mouseMap = (Raylib.GetMousePosition() - windowCenter) / zoom - mapPos - new Vector2(mapTex.Width / 2f, mapTex.Height / 2f);
                 if (debug) Raylib.DrawText($"currentMenu: {currentMenu}\n\nMap: {mapPos.X},{mapPos.Y}\nIncrement: {moveIncrement}\nZoom: {zoom}\nScreenCenter: {windowCenter}\n\nMouse\n{mouseMap}\n\n{backButton.ID}\n\n{windowHeight},{windowWidth}", 0, 0, 20, Color.Pink);
                 Raylib.EndDrawing();
                 #endregion
