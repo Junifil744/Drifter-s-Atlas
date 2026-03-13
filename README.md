@@ -41,7 +41,11 @@ You can contact me at:<br>
 - [X] Properly managing every possible screen sizes.
 
 ### Alpha 0.4 (Collectibles Update)
-- [ ] All collectible types added.
+- [X] Color sets added
+- [ ] Keys added
+- [ ] Key doors added
+- [ ] Module doors added
+- [ ] Gearbits added (Dear christ)
 
 ### Beta 1.0 (QoL Update)
 - [ ] Saving the user config and having a button to remove said config.
