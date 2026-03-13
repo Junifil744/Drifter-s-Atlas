@@ -842,7 +842,7 @@ namespace Drifters_Atlas {
         }
     }
 
-    unsafe class Button{
+    internal class Button{
         public enum ButtonType : byte {
             None = 0, // Never to be used. Won't load anything. It's just useful to define a variable to be none when initialized.
             Menu = 1, // Menu buttons
@@ -852,7 +852,7 @@ namespace Drifters_Atlas {
         }
         public Rectangle rect;
         public string text;
-        public bool hovering = false;
+        public bool hovering;
         public ButtonType type;
         public int ID;
         // public Texture2D ghostImage;
@@ -861,13 +861,13 @@ namespace Drifters_Atlas {
         public Texture2D terImage;
         public event buttonClick onClick;
         public Menu parentMenu;
-        public byte state = 0;
+        public byte state;
 
         private Sound hoverSfx = Raylib.LoadSound("Resources/snd_MenuMove.wav");
         private Vector2 textPos = Vector2.Zero;
         private Vector2 namePos = Vector2.Zero;
         private Vector2 timePos = Vector2.Zero;
-        private bool lastFrameHover = false;
+        private bool lastFrameHover;
         private Font menuFont = Raylib.LoadFont("Resources/Imagine.ttf");
         private string[] props;
         private Vector2 drifterPos = Vector2.Zero;
@@ -927,7 +927,7 @@ namespace Drifters_Atlas {
                 if (state == 2) text = tertiaryToolTip;
                 else if (state == 1) text = enabledToolTip;
                 else text = disabledToolTip;
-                namePos = Raylib.MeasureTextEx(menuFont, text, fontSize / 2, -2f);
+                namePos = Raylib.MeasureTextEx(menuFont, text, fontSize / 2f, -2f);
                 textPos = new Vector2(Raylib.GetMousePosition().X + 30, Raylib.GetMousePosition().Y - namePos.Y/2);
             }
 
@@ -949,7 +949,7 @@ namespace Drifters_Atlas {
                         rect.X + (rect.Width - Raylib.MeasureTextEx(menuFont, props[2], fontSize * (parentMenu.menuBoxScale/2.5f), -2f).X) / 2,
                         rect.Y + 90 * (parentMenu.menuBoxScale/2.5f)
                     );
-                    drifterPos = new Vector2(rect.X + rect.Width - image.Width * 3 - 30, rect.Y + rect.Height/2 - image.Height*3/2);
+                    drifterPos = new Vector2(rect.X + rect.Width - image.Width * 3 - 30, rect.Y + rect.Height/2 - image.Height*3/2f);
                 }
             } else if (type != ButtonType.Map) {
                 textPos = new Vector2(
@@ -958,7 +958,7 @@ namespace Drifters_Atlas {
                 );
             }
             if (hovering && Raylib.IsMouseButtonPressed(MouseButton.Left)) {
-                onClick?.Invoke(this, ID);
+                onClick(this, ID);
             }
             if (hovering && !lastFrameHover) {
                 if(type == ButtonType.Back) {
@@ -1012,12 +1012,12 @@ namespace Drifters_Atlas {
         public void DrawToolTip() {
             Raylib.DrawRectangle((int)textPos.X, (int)textPos.Y, (int)namePos.X, (int)namePos.Y, new Color(32, 32, 32));
             Raylib.DrawRectangleLinesEx(new Rectangle(textPos, namePos), 2, new Color(22, 22, 22));
-            Raylib.DrawTextEx(menuFont, text, textPos, fontSize / 2, -2f, Color.White);
+            Raylib.DrawTextEx(menuFont, text, textPos, fontSize / 2f, -2f, Color.White);
         }
         public delegate void buttonClick(Button sender, int ID);
     }
 
-    unsafe class MapSprite {
+    internal class MapSprite {
         public enum SpriteType : byte {
             None = 0,
             Drifter = 1,
@@ -1038,7 +1038,7 @@ namespace Drifters_Atlas {
         public Rectangle rect;
         public SpriteType type;
         public int ID = 0;
-        public string tag = string.Empty;
+        public string tag;
         public Texture2D sprite;
         public Texture2D? altSprite;
         public event collectibleClick onClick;
@@ -1046,8 +1046,9 @@ namespace Drifters_Atlas {
         public Rectangle parentObject;
         public float scale;
         public string tip;
-        public bool underground = false;
-        public bool collected = false;
+        public bool underground;
+        public bool collected;
+        public bool collectible = true;
 
         public MapSprite(Texture2D tex, SpriteType sType, Vector2 pos, bool underground, Texture2D? altTex = null, int? id = null, string? tag = null) {
             ID = id ?? 0;
@@ -1092,7 +1093,7 @@ namespace Drifters_Atlas {
         public delegate void collectibleClick();
     }
 
-    unsafe class Menu {
+    internal class Menu {
         public enum MenuType : byte { // solely used to define what the box is meant to look like.
             None = 0, 
             Menu = 1,
@@ -1100,14 +1101,14 @@ namespace Drifters_Atlas {
         }
         public Rectangle rect;
         public string name;
-        public List<Button> buttonList = new List<Button>();
+        public List<Button> buttonList = [];
         public MenuType type;
         public ushort indexMax;
 
         public float menuBoxScale;
         private Font menuFont = Raylib.LoadFont("Resources/Imagine.ttf");
-        private int windowWidth = Raylib.GetScreenWidth();
-        private int windowHeight = Raylib.GetScreenHeight();
+        private int windowWidth;
+        private int windowHeight;
         private int textX, textY;
 
         // sheer simplicity
