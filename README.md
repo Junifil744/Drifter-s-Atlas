@@ -2,7 +2,7 @@
 An Interactive Map for Hyper Light Drifter
 
 # How to use it
-You can open it, itll automatically read the save files from your AppData folder.<br>
+You can open it, it'll automatically read the save files from your AppData folder.<br>
 Or, you could simply drag and drop your own file and it will read it just as fine.<br>
 Then the controls are as follows;
 - WASD/Arrow Keys to move
@@ -18,6 +18,16 @@ I'm open to any feedback<br>
 You can contact me at:<br>
 - My Discord (Junifil)<br>
 - My Email (junifil@middlemouse.click)
+
+# Previews
+### The app's main menu
+![mainmenu](previews/preview1.png)
+### Comparison of file loading
+![saveload](previews/preview2.png)
+### Main map look
+![mapnormal](previews/preview3.png)
+### Underground map look
+![mapug](previews/preview4.png)
 
 # Roadmap
 ### Alpha 0.1 (First release)
@@ -57,4 +67,5 @@ You can contact me at:<br>
 - [ ] Live refreshing of the save, or having a button meant for it.
 
 ### Release 1.0
+- [ ] Fixed miscellaneous issues
 - [ ] Debugged people's feedbacks
